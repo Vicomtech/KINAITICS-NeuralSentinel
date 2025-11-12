@@ -1,100 +1,181 @@
-# NeuralSentinel Desktop Application
+# NeuralSentinel
 
-NeuralSentinel is a cross-platform Electron-based desktop app for managing, visualizing, and evaluating AI datasets and trained models. It integrates a local Python backend for computing metrics (via plugins) with a modern JavaScript front-end.
+NeuralSentinel is a cross-platform **Electron-based desktop application** for managing, visualizing, and evaluating AI datasets and trained models.
+It integrates a **local Python backend** for metric computation (via plugins) with a **modern JavaScript frontend**.
+
+---
 
 ## Features
 
-- **File Upload & Management**  
-  - Upload datasets (`.csv`, `.xls`, `.xlsx`, `.npy`).  
-  - Upload trained models (`.h5`).  
-  - Files are stored under the userData/uploads directory.
-- **Dashboard**  
-  - Interactive sidebar listing uploaded Datasets and Models.  
-  - Selected file is highlighted; click to load and visualize.  
-  - Collapsible sidebar for more screen space.
-- **Visualization**  
-  - Data previews: CSV table, Excel sheet, NumPy `.npy` preview.  
-  - Model summaries for `.h5` files (via `h5_visualizer.py`).
-- **Metrics & Plugins**  
-  - Extensible plugin architecture: run `run_plugins.py` to compute custom metrics.  
-  - Plugin tabs injected dynamically into the dashboard.  
-- **Export**  
-  - Export computed metrics to Excel (`.xlsx`) or CSV.
+- **Dataset & Model Management**
 
-## Live Updates & Hot Reload
+  - Upload datasets (`.csv`, `.xls`, `.xlsx`, `.npy`)
+  - Upload trained models (`.h5`)
+  - Files stored under `userData/uploads/`
+- **Dashboard**
 
-- `npm start` launches in development mode, loading Python scripts directly from `python_backend/` without packaging.
-- Use `npm run dist` (electron-builder --dir) to quickly generate an unpacked build in `dist/` for testing the packaged app.
+  - Interactive sidebar listing datasets and models
+  - Collapsible sidebar for larger view area
+  - File selection highlights active item
+- **Visualization**
 
-## Requirements
+  - CSV/Excel/NumPy data preview
+  - Model summaries for `.h5` files via `h5_visualizer.py`
+- **Metrics & Plugins**
 
-- **Node.js** LTS or newer.  
-- **Python 3.7+** (for development mode) with required packages installed via:
+  - Extensible plugin architecture (`python_backend/plugins/`)
+  - Execute metrics and visualizations dynamically (`run_plugins.py`)
+  - Plugin tabs are auto-injected into the dashboard
+- **Export**
 
-    cd python_backend  
-    pip install -r requirements.txt
+  - Export computed metrics to `.xlsx` or `.csv`
 
-> **Note:** In packaged builds, an embedded Python distribution is bundled automatically (no external Python install needed).
+---
 
-## Project Structure
+## Development Setup
 
-    ├── main.js                # Electron main process; IPC handlers
-    ├── preload.js             # Safe bridge for renderer
-    ├── package.json           # Dependencies & build scripts
-    ├── renderer/              # Front-end HTML, CSS, JS
-    │   ├── views/             # upload.html, dashboard.html, login.html
-    │   ├── controllers/       # upload.js, dashboard.js
-    │   └── styles/            # styles.css
-    ├── python_backend/        # Python scripts and plugins
-    │   ├── python_embedded/   # Bundled embeddable Python (for production)
-    │   ├── plugins/           # Plugin folders with visualizer.py
-    │   ├── run_plugins.py     # Entrypoint for computing metrics
-    │   ├── h5_visualizer.py      # Model summary script
-    │   └── requirements.txt   # Python dev dependencies
-    └── scripts/               # Build helper scripts (e.g., disable-fuses.js)
+This guide describes how to configure, run, and build the application in a reproducible environment using **Conda** and **Node.js**.
 
-## Installation & Setup
+### Prerequisites
 
-1. **Clone the repo**:
+- **Node.js** ≥ 18
+- **Anaconda** or **Miniconda**
+- `requirements.txt` file in the project root
 
-    git clone https://gitlab.com/rfernandez10/neuralsentinel.git  
-    cd neuralsentinel
+---
 
-2. **Install Node dependencies**:
+### 1. Install Node.js Dependencies
 
-    npm install
+```bash
+git clone https://gitlab.com/rfernandez10/neuralsentinel.git
+cd neuralsentinel
+npm install
+```
 
-3. **(Optional) Python env for development**:
+---
 
-    cd python_backend  
-    python -m venv venv  
-    source venv/bin/activate   # Linux/macOS  
-    .\venv\Scripts\activate    # Windows  
-    pip install -r requirements.txt
+### 2. Create and Configure the Conda Environment
 
-4. **Run in development** with hot reload:
+```bash
+# Create environment
+conda create -n neuralsentinel_dev python=3.9.22
 
-    npm start
+# Activate environment
+conda activate neuralsentinel_dev
 
-5. **Quick unpacked build for testing**:
+# Install Python dependencies
+pip install -r requirements.txt
+```
 
-    npm run dist
+---
 
-6. **Full installer build**:
+### 3. Run the Application (Development Mode)
 
-    npm run build
+#### Windows / Linux
 
-Installers/output appear in `dist/`.
+```bash
+conda activate neuralsentinel_dev
+npm start
+```
+
+The application runs using the Python environment `neuralsentinel_dev`.
+
+---
+
+## Building for Production
+
+### 1. Prepare the Embedded Python Environment
+
+Before building, create a self-contained Python environment for packaging.
+
+```bash
+# Activate the environment
+conda activate neuralsentinel_dev
+
+# Create embedded environment directory
+mkdir -p python_backend/python_embedded
+```
+
+Copy the entire Conda environment directory (e.g.`C:\Users\<User>\Anaconda3\envs\neuralsentinel_dev`)into `python_backend/python_embedded`.
+
+> Perform this process separately for each target OS (Windows → Windows, Linux → Linux).
+
+---
+
+### 2. Build the Installer
+
+```bash
+npm run build
+```
+
+Build artifacts and installers are generated in the `/dist` directory.
+
+---
 
 ## Customization & Plugins
 
-- **Adding a plugin**: Create a new folder under `python_backend/plugins/{plugin_name}` containing:  
-  - `visualizer.py` (renders HTML for dashboard tab)  
-  - Any dependencies under `python_backend/plugins/{plugin_name}/`.
-- Update `plugin_config.yaml` to enable your plugin.
+### Adding a Plugin
+
+Create a new folder under `python_backend/plugins/{plugin_name}` containing:
+
+- `visualizer.py` → Renders HTML for dashboard tab
+- Any additional dependencies in the same folder
+
+Then update `plugin_config.yaml` to enable your plugin.
+
+### Plugin Execution
+
+Plugins are discovered and executed dynamically at runtime via:
+
+```bash
+python python_backend/run_plugins.py
+```
+
+Each plugin can expose metrics, charts, or visual components directly to the frontend.
+
+---
+
+## Project Structure
+
+```
+neuralsentinel/
+├── main.js                  # Electron main process
+├── preload.js               # Safe bridge between frontend and backend
+├── package.json             # Node.js dependencies & build scripts
+├── renderer/                # Frontend code (HTML/CSS/JS)
+│   ├── views/               # UI pages: upload.html, dashboard.html, etc.
+│   ├── controllers/         # View controllers: upload.js, dashboard.js
+│   └── styles/              # Global styles
+├── python_backend/          # Python backend
+│   ├── plugins/             # Metric plugins
+│   ├── python_embedded/     # Bundled Python env (for production)
+│   ├── run_plugins.py       # Entrypoint for plugin execution
+│   ├── h5_visualizer.py     # Model summary generator
+│   └── requirements.txt     # Python dependencies
+├── dist/                    # Build output
+└── README.md                # Project documentation
+```
+
+---
+
+## Live Updates & Quick Builds
+
+- `npm start` — run in development mode with live reloading
+- `npm run dist` — generate an unpacked build (for fast testing)
+- `npm run build` — generate full production installer
+
+---
 
 ## Contributing
 
-- Report issues or request features via GitLab issues.  
-- Fork, fix, and submit merge requests.  
-- Follow code style: ES6+, consistent indent (2 spaces), and TDD for Python scripts.
+- Report bugs or request features via GitLab Issues
+- Fork and submit Merge Requests
+- Follow code style:
+  - JavaScript: ES6+, 2-space indentation
+  - Python: PEP8 compliance and test coverage for plugins
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.

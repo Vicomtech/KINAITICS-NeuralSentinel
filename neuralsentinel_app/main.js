@@ -21,6 +21,100 @@ process.on('uncaughtException', (err) => {
 });
 
 
+/**
+ * -------------------------------------------------------------------
+ * NEW PYTHON HELPER FUNCTIONS (REPLACEMENT)
+ * -------------------------------------------------------------------
+ */
+
+/**
+ * Gets the correct Python executable path based on the environment.
+ * - In Development: Relies on 'python' being in the system PATH 
+ * (i.e., running from an activated Conda/venv).
+ * - In Production: Finds the executable bundled inside the app resources.
+ * @returns {string} Path to the Python executable
+ */
+function getPythonExePath() {
+  // 1. PRODUCTION (PACKAGED) MODE
+  if (app.isPackaged) {
+    const platform = process.platform;
+    let exeName = 'python'; // Linux/macOS executable name
+    if (platform === 'win32') {
+      exeName = 'python.exe'; // Windows executable name
+    }
+
+    // Path to the bundled executable
+    const exePath = path.join(process.resourcesPath, 'python_backend', 'python_embedded', exeName);
+
+    if (!fs.existsSync(exePath)) {
+      const msg = `[FATAL] Packaged Python executable not found at: ${exePath}`;
+      log(msg);
+      throw new Error(msg);
+    }
+    log(`[PROD] Using packaged Python: ${exePath}`);
+    return exePath;
+  } 
+  
+  // 2. DEVELOPMENT (NPM START) MODE
+  else {
+    // Relies on the user running "npm start" from a shell
+    // where the 'neuralsentinel_dev' Conda env is ALREADY ACTIVATED.
+    log('[DEV] Using "python" from system PATH. (Ensure Conda env is active!)');
+    return 'python';
+  }
+}
+
+/**
+ * Gets the correct environment variables (like PYTHONPATH) for the Python process.
+ * - In Development: Points to local source code.
+ * - In Production: Points to bundled code and site-packages.
+ * @returns {Object} Environment object for spawn
+ */
+function getPythonEnv() {
+  let corePath;
+  let sitePackagesPath;
+
+  // 1. PRODUCTION (PACKAGED) MODE
+  if (app.isPackaged) {
+    corePath = path.join(process.resourcesPath, 'python_backend', 'core');
+    
+    // Construct the platform-specific path to site-packages
+    const platform = process.platform;
+    let libDir = 'lib/python3.11'; // TODO: Adjust if not Py 3.11 on Linux
+    if (platform === 'win32') {
+      libDir = 'Lib'; // Windows uses 'Lib'
+    }
+
+    sitePackagesPath = path.join(process.resourcesPath, 'python_backend', 'python_embedded', libDir, 'site-packages');
+    
+    if (!fs.existsSync(sitePackagesPath)) {
+       log(`[WARN] Packaged site-packages not found at: ${sitePackagesPath}`);
+    }
+
+  } 
+  
+  // 2. DEVELOPMENT (NPM START) MODE
+  else {
+    // Point to the local source code
+    corePath = path.join(__dirname, 'python_backend', 'core');
+    
+    // *** IMPORTANT ***
+    // We DO NOT need to set site-packages for dev mode.
+    // The activated Conda 'python' executable already knows where its
+    // own site-packages are located.
+    sitePackagesPath = null;
+  }
+
+  // Build the final PYTHONPATH
+  const pyPath = [corePath, sitePackagesPath].filter(Boolean).join(path.delimiter);
+
+  return { 
+    ...process.env, // Inherit existing env
+    PYTHONPATH: pyPath,
+    PYTHONUNBUFFERED: '1' // Force unbuffered output
+  };
+}
+
 
 // --------------------Utility functions--------------------
 /**
@@ -70,14 +164,7 @@ const log = createLogger();
 
 // --------------------Python process management--------------------
 let activePythonProcesses = [];
-const pyExe = getEmbeddedPythonExe();
-const embedDir = path.dirname(pyExe);
-
-// Verify Python executable exists
-//log(`[DEBUG] fs.existsSync(pyExe)= ${fs.existsSync(pyExe)}`);
-if (!fs.existsSync(embedDir)) {
-  log(`[DEBUG] embedDir DOES NOT EXIST: ${embedDir}`);
-}
+// (The lines defining pyExe and embedDir are now gone)
 
 /**
  * Spawns a Python process with the given script and arguments
@@ -87,11 +174,9 @@ if (!fs.existsSync(embedDir)) {
  * @returns {ChildProcess} The spawned Python process
  */
 function spawnLocalPython(scriptPath, args = [], options = {}) {
-  const pythonExe = getEmbeddedPythonExe();
-  if (!pythonExe || !fs.existsSync(pythonExe)) {
-    log(`[ERROR] Python executable not found at: ${pythonExe}`);
-    throw new Error(`Python executable not found at: ${pythonExe}`);
-  }
+  // --- MODIFIED ---
+  const pythonExe = getPythonExePath(); 
+  // --- END MODIFIED ---
 
   if (!fs.existsSync(scriptPath)) {
     log(`[ERROR] Script path not found: ${scriptPath}`);
@@ -101,17 +186,16 @@ function spawnLocalPython(scriptPath, args = [], options = {}) {
   // Use provided stdio or default to ignoring output
   const stdio = options.stdio || ['ignore', 'ignore', 'ignore'];
 
+  // --- MODIFIED ---
+  // Get the base Python environment
+  const env = getPythonEnv();
+
   const proc = spawn(pythonExe, [scriptPath, ...args], {
-    env: { 
-      ...process.env,
-      PYTHONPATH: [
-        path.join(__dirname, 'python_backend', 'core'),
-        path.join(__dirname, 'python_backend', 'python_embedded', 'site-packages')
-      ].join(path.delimiter)
-    },
+    env: env, // Use the new environment
     detached: true,
     stdio
   });
+  // --- END MODIFIED ---
 
   activePythonProcesses.push(proc);
 
@@ -332,7 +416,6 @@ function getNpyNpzVisualizerScriptPath() {
   return path.join(process.resourcesPath, 'python_backend', 'npy_npz_visualizer.py');
 }
 
-// --------------------Python script execution--------------------
 /**
  * Runs a Python script and returns its output
  * @param {string} scriptPath - Path to Python script
@@ -341,16 +424,21 @@ function getNpyNpzVisualizerScriptPath() {
  */
 function runPythonScript(scriptPath, args = []) {
   return new Promise((resolve, reject) => {
-    const pythonExe = getEmbeddedPythonExe();
-    if (!pythonExe || !fs.existsSync(pythonExe)) {
-      return reject(new Error(`Embedded Python exe not found at ${pythonExe}`));
-    }
+    // --- MODIFIED ---
+    const pythonExe = getPythonExePath();
+    // --- END MODIFIED ---
 
     if (!fs.existsSync(scriptPath)) {
       return reject(new Error(`Script path not found: ${scriptPath}`));
     }
-
-    const pythonProcess = spawn(pythonExe, [scriptPath, ...args]);
+    
+    // --- MODIFIED ---
+    // Spawn with the correct environment
+    const pythonProcess = spawn(pythonExe, [scriptPath, ...args], {
+      env: getPythonEnv() 
+    });
+    // --- END MODIFIED ---
+    
     let stdoutData = "";
     let stderrData = "";
 
@@ -368,7 +456,9 @@ function runPythonScript(scriptPath, args = []) {
         try {
           resolve(JSON.parse(stdoutData));
         } catch (err) {
-          reject(new Error('Failed to parse JSON output'));
+          // Fallback if output is not JSON
+          log(`[DEBUG] Python script output (non-JSON): ${stdoutData}`);
+          resolve(stdoutData.trim());
         }
       } else {
         reject(new Error(stderrData || 'Python script failed with no stderr'));
@@ -864,20 +954,7 @@ ipcMain.handle('compute-combo-metrics', async (event, {
  * @returns {string} Path to Python executable
  * @throws {Error} If Python executable not found
  */
-function getEmbeddedPythonExe() {
-  const rel = path.join('python_backend', 'python_embedded', 'python.exe');
 
-  if (!app.isPackaged) {
-    return path.join(__dirname, rel);
-  }
-
-  const exePath = path.join(process.resourcesPath, rel);
-  if (!fs.existsSync(exePath)) {
-    log(`[ERROR] python.exe no encontrado en: ${exePath}`);
-    throw new Error(`python.exe no encontrado en: ${exePath}`);
-  }
-  return exePath;
-}
 
 // --------------------Plugin visualization handler--------------------
 ipcMain.handle('get-tab-html', async (event, pluginName, metrics) => {
@@ -893,16 +970,20 @@ ipcMain.handle('get-tab-html', async (event, pluginName, metrics) => {
     app.isPackaged ? process.resourcesPath : __dirname,
     relViz
    );
-    const pyExe = getEmbeddedPythonExe();
-    //log(`[${pluginName}] lanzando visualizer: ${pyExe} ${visualizer}`);
-
-    const cwd = path.dirname(pyExe);
+    // --- MODIFIED ---
+    const pyExe = getPythonExePath();
+    const pyEnv = getPythonEnv();
+    // --- END MODIFIED ---
+    
+    // We don't need 'cwd' if PYTHONPATH is set correctly
+    // const cwd = path.dirname(pyExe); 
 
     return await new Promise(resolve => {
+      // --- MODIFIED ---
       const child = spawn(pyExe, [visualizer, JSON.stringify(metrics || {})], {
-        cwd,
-        env: { ...process.env, PYTHONUNBUFFERED: '1' }
+        env: pyEnv // Use the correct environment
       });
+      // --- END MODIFIED ---
 
       let stdout = '', stderr = '';
       child.stdout.on('data', data => { stdout += data.toString(); });
@@ -975,7 +1056,6 @@ module.exports = {
   getRunPluginsScriptPath,
   getH5VisualizerScriptPath,
   getNpyNpzVisualizerScriptPath,
-  getEmbeddedPythonExe,
 
   // App helpers
   getAppIcon,

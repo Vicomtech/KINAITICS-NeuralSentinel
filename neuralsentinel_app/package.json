@@ -29,14 +29,21 @@
     "directories": {
       "output": "dist"
     },
-    "files": [
-      "preload.js",
-      "main.js",
-      "renderer/**/*",
-      "python_backend/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
+  "files": [
+        "preload.js",
+        "main.js",
+        "renderer/**/*",
+        "node_modules/**/*",
+        "package.json",
+        
+        "python_backend/*.py",
+        "python_backend/core/**/*",
+        "python_backend/plugins/**/*",
+        "python_backend/userDatabase/**/*",
+        "python_backend/continuous_authentication/**/*",
+        
+        "!python_backend/python_embedded/**"
+      ],
     "extraResources": [
       {
         "from": "python_backend",
