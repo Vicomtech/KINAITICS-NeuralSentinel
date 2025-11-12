@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: NeuralSentinel
+  description: "NeuralSentinel is an advanced tool designed to evaluate the vulnerability\
+    \ of artificial neural network (ANN) models to evasion attacks. By conducting\
+    \ a thorough analysis, NeuralSentinel identifies potential weaknesses in the model\
+    \ that adversaries could exploit, providing critical insights into its susceptibility\
+    \ to crafted perturbations.\n\nThe tool operates by systematically assessing the\
+    \ model's behavior under various evasion scenarios, identifying patterns and points\
+    \ of failure where the model may misclassify adversarial inputs. This detailed\
+    \ evaluation empowers users with a clear understanding of the model's robustness\
+    \ and the specific areas that require improvement. \n\nBeyond vulnerability assessment,\
+    \ NeuralSentinel equips users with actionable strategies to enhance the security\
+    \ of their models. It supports the integration of various defensive mechanisms,\
+    \ such as adversarial training, input preprocessing techniques, or architecture-level\
+    \ modifications, to mitigate risks and fortify the model against future attacks.\
+    \ \n\nBy combining analysis and defense, NeuralSentinel serves as a comprehensive\
+    \ solution for maintaining the integrity and reliability of ANN models in adversarial\
+    \ environments."
+  contact:
+    email: xetxeberria@vicomtech.com
+  version: 1.0.11
+servers:
+- url: https://0.0.0.0:8888/
+tags:
+- name: user
+  description: Operations about user
+paths:
+  /initialize:
+    post:
+      tags:
+      - user
+      summary: Initialize the scenario to be analyzed
+      description: "The initialize function is a key component designed to set up\
+        \ the analysis process for a specific medical scenario. It requires a mandatory\
+        \ parameter, scenario, which must be provided as a query string. This parameter\
+        \ determines the context or dataset that will be analyzed and must be one\
+        \ of the predefined BreastCancer or BrainCancer. Selecting BreastCancer configures\
+        \ the analysis for scenarios related to breast cancer, while BrainCancer focuses\
+        \ on brain cancer cases. As this parameter is essential for the function to\
+        \ operate, users must specify one of the allowed values to proceed. By enabling\
+        \ scenario-specific initialization, the initialize function ensures that the\
+        \ analysis is tailored to the chosen context, providing accurate and relevant\
+        \ insights for the selected medical condition."
+      operationId: initialize
+      parameters:
+      - name: environment
+        in: query
+        description: The name of the environment to be analyzed
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - Aortic Calcification
+      - name: scenario
+        in: query
+        description: The name of the scenario to be analyzed. The Original scenario
+          is the model without any defense and the rest are the original model but
+          defended with the defense method in the name of the scenario.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - Original
+          - Adversarial Training
+          - Dimensionality Reduction
+          - Prediction Similarity
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /fgsm:
+    get:
+      tags:
+      - user
+      summary: Evaluate the AI model in FGSM attack
+      description: "The Fast Gradient Sign Method (FGSM) is a widely used evasion\
+        \ attack technique designed to fool neural networks by adding a small, carefully\
+        \ crafted perturbation to the input data. This perturbation is calculated\
+        \ using the gradient of the loss function with respect to the input, effectively\
+        \ leveraging the model's own gradients to maximize prediction error. Despite\
+        \ its simplicity and efficiency, FGSM can significantly impact a model's performance,\
+        \ making it a common baseline for evaluating the robustness of neural networks\
+        \ against adversarial attacks."
+      operationId: fgsm
+      parameters:
+      - name: n_sample
+        in: query
+        description: The number of samples used in the analysis.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /pgd:
+    get:
+      tags:
+      - user
+      summary: Evaluate the AI model in PGD attack
+      description: "The Projected Gradient Descent (PGD) attack is an iterative and\
+        \ more powerful variant of the FGSM attack, widely used to evaluate the robustness\
+        \ of neural networks against adversarial attacks. PGD generates adversarial\
+        \ examples by iteratively applying small perturbations in the direction of\
+        \ the gradient of the loss function, ensuring the perturbations stay within\
+        \ a predefined p-norm constraint. After each step, the perturbation is projected\
+        \ back onto the allowable perturbation space, hence the name \"Projected Gradient\
+        \ Descent.\" This iterative approach makes PGD highly effective, often considered\
+        \ one of the strongest first-order adversarial attacks."
+      operationId: pgd
+      parameters:
+      - name: steps
+        in: query
+        description: Number of times ejecuted the process of PGD
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: n_sample
+        in: query
+        description: The number of samples used in the analysis.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /bim:
+    get:
+      tags:
+      - user
+      summary: Evaluate the AI model in BIM attack
+      description: "The Basic Iterative Method (BIM) is an iterative adversarial attack\
+        \ that extends the FGSM attack by applying the perturbation process multiple\
+        \ times with smaller steps. At each iteration, the method computes the gradient\
+        \ of the loss function with respect to the input and adjusts the input slightly\
+        \ in the direction that increases the loss. This iterative approach allows\
+        \ BIM to generate more precise and effective adversarial examples compared\
+        \ to FGSM, while keeping the perturbations constrained within a predefined\
+        \ limit. BIM is often used to test the robustness of neural networks against\
+        \ adversarial inputs."
+      operationId: bim
+      parameters:
+      - name: steps
+        in: query
+        description: Number of times ejecuted the process of PGD
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: n_sample
+        in: query
+        description: The number of samples used in the analysis.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /trojaning:
+    get:
+      tags:
+      - user
+      summary: Evaluate the AI model in Trojaning attack
+      description: "An Artificial Neural Network (ANN) Trojaning attack involves embedding\
+        \ a malicious modification, or Trojan, into a neural network to covertly alter\
+        \ its behavior under specific conditions. The attacker introduces a hidden\
+        \ trigger—such as a particular pattern, noise, or watermark—during training\
+        \ or post-training, causing the ANN to produce malicious outputs only when\
+        \ the trigger is present while maintaining normal functionality otherwise.\
+        \ These attacks are difficult to detect because they do not significantly\
+        \ degrade the model's performance on regular inputs, requiring advanced forensic\
+        \ or adversarial techniques to identify them. Trojaning attacks pose serious\
+        \ risks in security-sensitive domains, like biometrics and autonomous systems,\
+        \ where they could enable unauthorized access or erratic behavior. Mitigating\
+        \ these risks requires robust training techniques, model inspection, trigger\
+        \ testing, and secure development practices to prevent unauthorized modifications\
+        \ and ensure model integrity."
+      operationId: trojaning
+      parameters:
+      - name: steps
+        in: query
+        description: Number of times ejecuted the process of Trojaning
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: n_sample
+        in: query
+        description: The number of samples used in the analysis.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /interpretability:
+    post:
+      tags:
+      - user
+      summary: Generate image from impact section of the metrics.
+      description: The function generates a visual representation of the impact of
+        an evasion attack on a system or model. This visualization helps users easily
+        interpret the severity of the attack and identify potential vulnerabilities
+        in the system.
+      operationId: interpretability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/interpretability'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+                x-content-type: image/jpeg
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /visualization:
+    post:
+      tags:
+      - user
+      summary: Generate image from impact section of the metrics.
+      description: The function generates a visual representation of the impact of
+        an evasion attack on a system or model. This visualization helps users easily
+        interpret the severity of the attack and identify potential vulnerabilities
+        in the system.
+      operationId: visualization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/visualization'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: bytes
+                x-content-type: text/plain
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+components:
+  schemas:
+    user:
+      type: object
+      example:
+        original_accuracy: 1
+        adversarial_accuracy: 0.8
+        difference_accuracy: 0.2
+        avg_similarity: 0.4
+        max_similarity: 0.7
+        min_similarity: 0.2
+        impact:
+          input_1:
+            values: []
+            neurons: []
+          input_2:
+            values: []
+            neurons: []
+    visualization:
+      type: object
+      example:
+        original: []
+        adversarial: []
+        noise: []
+    interpretability:
+      type: object
+      example:
+        values: []
+        neuros: []
+
