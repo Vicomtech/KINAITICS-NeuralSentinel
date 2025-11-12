@@ -1,0 +1,578 @@
+/* ================================  
+  color variables
+================================ */
+:root {
+  --vicomtech-blue: #00ABC9;
+  --vicomtech-yellow: #FEDD00;
+  --vicomtech-gray: #6D6D6D;
+  --white: #ffffff;
+  --light-gray: #f0f2f5;
+  --dark-gray: #333333;
+  --error-red: #ff0000;
+}
+
+/* ================================  
+  1. general / global styles  
+================================ */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+}
+
+main {
+  flex: 1;
+}
+
+/* ================================  
+  2. login (landing page) styles  
+================================ */
+.login-container {
+  max-width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.login-container input {
+  width: 90%;
+  display: block;
+  padding: 10px;
+  margin: 10px auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-container button {
+  width: 100%;
+  display: block;
+  padding: 10px;
+  background-color: var(--vicomtech-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px auto;
+}
+
+.login-container button:hover {
+  background-color: var(--vicomtech-yellow);
+}
+
+.error {
+  color: var(--error-red);
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* ================================  
+  3. index styles  
+================================ */
+.index-header {
+  display: flex;
+  align-items: center;
+  background-color: var(--vicomtech-gray);
+  padding: 20px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.ns-logo {
+  height: 60px;
+  margin-right: 15px;
+}
+
+.ns-title {
+  color: var(--white);
+  font-size: 28px;
+  margin: 0;
+}
+
+.index-main {
+  padding: 60px 20px;
+  text-align: center;
+  background: var(--light-gray);
+}
+
+.index-main h2 {
+  margin-bottom: 20px;
+  font-size: 32px;
+  color: var(--vicomtech-gray);
+}
+
+.index-description {
+  font-size: 18px;
+  color: var(--vicomtech-gray);
+  max-width: 700px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+.index-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+.index-buttons button {
+  width: 150px;
+}
+
+.index-footer {
+  background-color: var(--vicomtech-gray);
+  color: var(--vicomtech-yellow);
+  text-align: center;
+  padding: 15px 20px;
+  font-size: 14px;
+}
+
+/* ================================
+  4. buttons & link buttons
+================================ */
+button,
+a.btn {
+  display: inline-block;
+  background-color: var(--vicomtech-blue);
+  color: var(--white);
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+}
+
+button:hover,
+a.btn:hover {
+  background-color: var(--vicomtech-yellow);
+  transform: translateY(-2px);
+}
+
+/* ================================
+  5. export button
+================================ */
+.export-button,
+a.export-button {
+  margin-top: 20px;
+  background-color: var(--vicomtech-blue);
+  color: var(--white);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.export-button:hover,
+a.export-button:hover {
+  background-color: var(--vicomtech-yellow);
+}
+
+/* ================================  
+  6. upload page  
+================================ */
+.upload-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 400px;
+  min-height: 300px;
+  padding: 20px;
+  color: var(--vicomtech-gray);
+  text-align: center;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  position: relative;
+}
+
+.upload-dataset {
+  background-color: var(--vicomtech-yellow);
+}
+
+.upload-dataset button {
+  background-color: var(--vicomtech-blue);
+}
+
+.upload-model {
+  background-color: var(--vicomtech-blue);
+  color: var(--white);
+}
+
+.upload-model button {
+  background-color: var(--vicomtech-yellow);
+  color: var(--vicomtech-gray);
+}
+
+.upload-model h1,
+.upload-model .upload-description {
+  color: var(--white);
+}
+
+.upload-description {
+  margin-bottom: 15px;
+}
+
+/* tooltip */
+.info-tooltip {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.upload-dataset .info-tooltip .info-icon {
+  background-color: var(--vicomtech-blue);
+  color: var(--vicomtech-yellow);
+}
+
+.upload-model .info-tooltip .info-icon {
+  background-color: var(--vicomtech-yellow);
+  color: var(--vicomtech-blue);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 220px;
+  background-color: var(--dark-gray);
+  color: var(--white);
+  text-align: center;
+  border-radius: 4px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  top: -5px;
+  left: 110%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.info-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ================================  
+  7. dashboard page  
+================================ */
+.container {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--vicomtech-gray);
+  color: var(--vicomtech-yellow);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  font-size: 20px;
+  border-bottom: 2px solid var(--vicomtech-yellow);
+  padding-bottom: 10px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.sidebar ul li {
+  position: relative;
+  margin-bottom: 10px;
+  background-color: transparent;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar ul li:hover {
+  background-color: var(--vicomtech-yellow);
+  color: var(--vicomtech-gray);
+}
+
+.sidebar ul li:not(:last-child) {
+  border-bottom: 1px solid var(--vicomtech-yellow);
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: var(--light-gray);
+  overflow-y: auto;
+}
+
+/* ================================  
+  8. tabs  
+================================ */
+.tab-bar {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.tab-button {
+  background-color: var(--vicomtech-blue);
+  border: none;
+  padding: 10px 20px;
+  margin-right: 5px;
+  cursor: pointer;
+  color: var(--white);
+}
+
+.tab-button.active {
+  background-color: var(--vicomtech-yellow);
+  color: var(--vicomtech-gray);
+  font-weight: bold;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ================================  
+  9. file items  
+================================ */
+.file-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.file-name {
+  flex-grow: 1;
+  cursor: pointer;
+  color: var(--white);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  color: #c00;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.file-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.file-item.selected {
+  background-color: var(--vicomtech-yellow);
+}
+
+.file-item.selected .file-name {
+  color: var(--vicomtech-gray);
+}
+
+/* ================================  
+  10. logout button  
+================================ */
+.logout-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: var(--vicomtech-yellow);
+  color: var(--vicomtech-gray);
+  padding: 10px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  z-index: 9999;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #e0c700;
+  transform: translateY(-2px);
+}
+
+/* ================================  
+  11. metrics section  
+================================ */
+.metrics-list li {
+  background-color: transparent !important; 
+}
+
+/* ================================  
+  12. corner logo  
+================================ */
+.corner-logo {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 120px;
+  height: auto;
+  z-index: 1000;
+}
+
+/* ================================
+  13. visualization subtitle
+================================ */
+.visual-label {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--vicomtech-gray);
+  margin: 0.2em 0 1em;
+}
+
+/* ================================
+  14. sidebar collapsible
+================================ */
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease, padding 0.3s ease;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: visible;
+  background-color: transparent; 
+}
+
+.sidebar .collapse-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  left: auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--white);
+  cursor: pointer;
+  transition: transform 0.3s ease, right 0.3s ease, left 0.3s ease, color 0.3s ease;
+  box-shadow: none;
+  margin: 0;
+  z-index: 1000;
+}
+
+.sidebar.collapsed .collapse-btn {
+  transform: rotate(180deg);
+  right: auto;
+  top: 5px;
+  left:5px;
+  width: 32px;
+  height: 32px;
+  color: var(--vicomtech-gray);
+}
+
+.sidebar.collapsed > :not(.collapse-btn) {
+  display: none !important;
+}
+
+.sidebar.collapsed {
+  pointer-events: none;
+}
+
+.sidebar.collapsed .collapse-btn {
+  pointer-events: auto;
+}
+
+/* ================================
+  15. index buttons
+================================ */
+.index-buttons button {
+  width: 180px;
+  padding: 16px 24px;
+  font-size: 17px;
+}
+
+.index-buttons a.btn {
+  width: 220px;
+  padding: 20px 24px;
+  font-size: 18px;
+}
+
+/* ================================
+  debug only
+================================ */
+.heatmap-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  z-index: 1000;
+}
+
+.heatmap-cell {
+  border: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+}

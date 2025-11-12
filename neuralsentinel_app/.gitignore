@@ -1,0 +1,19 @@
+# Node/Electron
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Electron build output
+dist/
+out/
+
+# Python venv (virtualenv in the python_backend/venv folder)
+venv/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python bytecode files
+*.pyc
+__pycache__/

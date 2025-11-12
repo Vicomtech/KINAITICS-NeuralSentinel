@@ -1,0 +1,66 @@
+{
+  "name": "neuralsentinel-electron",
+  "version": "1.0.0",
+  "description": "NeuralSentinel Desktop application for managing and evaluating datasets and models.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "test": "jest"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "js-yaml": "^4.1.0",
+    "numpy-parser": "^1.2.3",
+    "python-shell": "^5.0.0",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "electron": "^25.9.8",
+    "electron-builder": "^26.0.12",
+    "jest": "^29.7.0"
+  },
+  "build": {
+    "appId": "com.neuralsentinel.app",
+    "productName": "NeuralSentinel",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "preload.js",
+      "main.js",
+      "renderer/**/*",
+      "python_backend/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "python_backend",
+        "to": "python_backend",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "renderer/assets/icono_Vicomtech.ico"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg",
+      "icon": "renderer/assets/icono_Vicomtech.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "icon": "renderer/assets/icono_Vicomtech.png"
+    }
+  },
+  "author": "Rocío Fernández <rfernandez@vicomtech.org>",
+  "license": "MIT"
+}
