@@ -50,7 +50,7 @@ Todo el procesamiento se realiza en el equipo del usuario, sin enviar ningún da
 | Componente | Mínimo | Recomendado |
 |---|---|---|
 | **Node.js** | 16.0.0 | 18+ |
-| **Python** | 3.11+
+| **Python** | 3.11 | 3.11+
 | **RAM** | 4 GB | 8 GB |
 | **Espacio en disco** | 2 GB | 5 GB |
 | **SO** | Windows 10 / Ubuntu 20.04 | Windows 11 / Ubuntu 22.04 |
@@ -529,12 +529,6 @@ La evaluación se ejecuta en segundo plano. Puedes monitorizar el progreso y los
 ## 📝 Licencia
 
 MIT License — ver [LICENSE.txt](LICENSE.txt) para más detalles.
-
----
-
-## 👥 Soporte
-
-Para reportar problemas o sugerencias, contacta al equipo de **NeuralSentinel**.
 
 ---
 
