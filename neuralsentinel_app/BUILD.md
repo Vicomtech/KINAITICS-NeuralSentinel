@@ -1,47 +1,47 @@
-# Guía de Empaquetado para Windows
+# Windows Packaging Guide
 
-## 🎯 Objetivo
+## 🎯 Goal
 
-Generar un instalador ejecutable (.exe) de ML Auditor para Windows que incluya todo lo necesario para ejecutar la aplicación.
-
----
-
-## 📋 Requisitos Previos
-
-Antes de empaquetar, asegúrate de tener:
-
-- ✅ Node.js 16+ instalado
-- ✅ Python 3.8+ instalado
-- ✅ Todas las dependencias del proyecto instaladas
+Generate a self-contained Windows installer (`.exe`) for NeuralSentinel that includes everything needed to run the application.
 
 ---
 
-## 🚀 Opción 1: Build Automático (Recomendado)
+## 📋 Prerequisites
 
-Ejecuta el script que hace todo automáticamente:
+Before packaging, make sure you have:
+
+- ✅ Node.js 16+ installed
+- ✅ Python 3.11+ installed
+- ✅ All project dependencies installed
+
+---
+
+## 🚀 Option 1: Automated Build (Recommended)
+
+Run the script that handles everything automatically:
 
 ```cmd
 build-windows.bat
 ```
 
-Este script:
-1. Instala dependencias de Node.js
-2. Crea entorno virtual de Python y instala dependencias
-3. Construye el ejecutable con electron-builder
+This script:
+1. Installs Node.js dependencies
+2. Creates a Python virtual environment and installs dependencies
+3. Builds the installer with electron-builder
 
-**Resultado:** El instalador estará en `dist/ML Auditor-1.0.0-Setup.exe`
+**Output:** The installer will be at `dist/NeuralSentinel-1.0.0-Setup.exe`
 
 ---
 
-## 🔧 Opción 2: Build Manual
+## 🔧 Option 2: Manual Build
 
-### Paso 1: Instalar Dependencias
+### Step 1: Install Node.js Dependencies
 
 ```cmd
 npm install
 ```
 
-### Paso 2: Preparar Backend
+### Step 2: Prepare the Python Backend
 
 ```cmd
 cd backend
@@ -52,7 +52,7 @@ deactivate
 cd ..
 ```
 
-### Paso 3: Construir
+### Step 3: Build
 
 ```cmd
 npm run build:win
@@ -60,41 +60,41 @@ npm run build:win
 
 ---
 
-## 📦 Tipos de Salida
+## 📦 Output Types
 
-El proceso genera dos tipos de ejecutables:
+The build process produces two executables:
 
-### 1. **Instalador NSIS** (Recomendado)
-- **Archivo:** `ML Auditor-1.0.0-Setup.exe`
-- **Tipo:** Instalador completo
-- **Características:**
-  - Instalación en `C:\Program Files\ML Auditor\`
-  - Acceso directo en escritorio y menú inicio
-  - Desinstalador incluido
-  - Permite elegir directorio de instalación
+### 1. NSIS Installer (Recommended)
+- **File:** `NeuralSentinel-1.0.0-Setup.exe`
+- **Type:** Full installer
+- **Features:**
+  - Installs to `C:\Program Files\NeuralSentinel\`
+  - Creates desktop and Start Menu shortcuts
+  - Includes an uninstaller
+  - Allows user to choose installation directory
 
-### 2. **Portable**
-- **Archivo:** `ML Auditor-1.0.0-portable.exe`
-- **Tipo:** Ejecutable portable
-- **Características:**
-  - No requiere instalación
-  - Ejecutar desde cualquier ubicación
-  - Ideal para USB o uso temporal
+### 2. Portable Executable
+- **File:** `NeuralSentinel-1.0.0-portable.exe`
+- **Type:** Portable standalone
+- **Features:**
+  - No installation required
+  - Can be run from any location (USB drive, etc.)
+  - Ideal for temporary or restricted environments
 
 ---
 
-## 📁 Contenido del Paquete
+## 📁 Package Contents
 
-El ejecutable incluye:
+The installer includes:
 
 ```
-ML Auditor/
+NeuralSentinel/
 ├── Electron App (Frontend)
 │   ├── main.js
 │   ├── index.html
 │   └── src/
-├── Backend Python
-│   ├── app.py
+├── Python Backend
+│   ├── app.py  (or app.exe if compiled with PyInstaller)
 │   ├── api/
 │   ├── core/
 │   ├── plugins/
@@ -107,94 +107,93 @@ ML Auditor/
 
 ---
 
-## ⚙️ Configuración de Build
+## ⚙️ Build Configuration
 
-La configuración está en `package.json` bajo la sección `"build"`:
+The build configuration is defined in `package.json` under the `"build"` key:
 
 ```json
 {
   "build": {
     "appId": "com.neuralsentinel.mlauditor",
-    "productName": "ML Auditor",
+    "productName": "NeuralSentinel",
     "win": {
       "target": ["nsis", "portable"],
-      "icon": "build/icon.ico"
+      "icon": "assets/icon.ico"
     }
   }
 }
 ```
 
-### Personalizar Configuración
+### Customization
 
-- **Cambiar versión:** Modifica `"version"` en `package.json`
-- **Cambiar nombre:** Modifica `"productName"` en build config
-- **Cambiar icono:** Reemplaza `build/icon.ico` (256x256 px recomendado)
+| Setting | How to change |
+|---|---|
+| App version | Modify `"version"` in `package.json` |
+| Product name | Modify `"productName"` in the build config |
+| App icon | Replace `assets/icon.ico` (256×256 px recommended) |
 
 ---
 
-## 🎨 Icono de la Aplicación
+## 🎨 Application Icon
 
-### Formato Requerido
-- **Windows:** `.ico` (múltiples tamaños: 16x16, 32x32, 48x48, 64x64, 128x128, 256x256)
-- **Linux:** `.png` (512x512 px)
+### Required Formats
+- **Windows:** `.ico` (multiple sizes: 16×16, 32×32, 48×48, 64×64, 128×128, 256×256)
+- **Linux:** `.png` (512×512 px)
 
-### Generar Icono
+### Converting a PNG to ICO
 
-Si tienes una imagen PNG, puedes convertirla a ICO:
-
-**Opción 1 - Online:**
-- https://convertio.co/es/png-ico/
+**Option 1 — Online tools:**
+- https://convertio.co/png-ico/
 - https://icoconvert.com/
 
-**Opción 2 - ImageMagick:**
+**Option 2 — ImageMagick:**
 ```cmd
-magick convert icon.png -define icon:auto-resize=256,128,64,48,32,16 build/icon.ico
+magick convert icon.png -define icon:auto-resize=256,128,64,48,32,16 assets/icon.ico
 ```
 
-### Ubicación
-Coloca el icono en: `build/icon.ico`
+Place the resulting file at: `assets/icon.ico`
 
 ---
 
-## 🔍 Verificar Build
+## 🔍 Verifying the Build
 
-Después del build, verifica:
+After the build completes, check the output:
 
 ```cmd
 dir dist
 
-# Deberías ver:
-# ML Auditor-1.0.0-Setup.exe      (Instalador)
-# ML Auditor-1.0.0-portable.exe   (Portable)
-# win-unpacked/                    (Carpeta desempaquetada)
+# You should see:
+# NeuralSentinel-1.0.0-Setup.exe      (Installer)
+# NeuralSentinel-1.0.0-portable.exe   (Portable)
+# win-unpacked\                        (Unpacked directory)
 ```
 
 ---
 
-## 🧪 Probar el Instalador
+## 🧪 Testing the Installer
 
-1. **Instalar:**
+1. **Install:**
    ```cmd
    cd dist
-   "ML Auditor-1.0.0-Setup.exe"
+   "NeuralSentinel-1.0.0-Setup.exe"
    ```
 
-2. **Ejecutar desde menú inicio** o acceso directo del escritorio
+2. **Launch** from the Start Menu or desktop shortcut.
 
-3. **Verificar:**
-   - La aplicación inicia correctamente
-   - El backend Python arranca automáticamente
-   - Todas las funciones están operativas
+3. **Verify:**
+   - Application starts correctly
+   - Python backend launches automatically
+   - All features are functional
 
 ---
 
-## 📝 Notas Importantes
+## 📝 Important Notes
 
 ### ⚠️ Python Runtime
 
-El ejecutable **NO incluye Python** automáticamente. Los usuarios deben tener Python instalado.
+The Electron installer **does NOT automatically bundle Python**. End users must have Python installed on their system.
 
-**Alternativa:** Empaquetar Python con PyInstaller:
+**Alternative — Bundle Python with PyInstaller:**
 
 ```cmd
 cd backend
@@ -202,80 +201,75 @@ pip install pyinstaller
 pyinstaller --onefile --add-data "plugins;plugins" app.py
 ```
 
-Luego actualiza `main.js` para usar el ejecutable generado en `backend/dist/app.exe`
+Then update `main.js` to use the generated executable at `backend/dist/app.exe`.
 
-### ⚠️ Dependencias Nativas
+### ⚠️ Native Python Dependencies
 
-Si usas módulos nativos de Python (TensorFlow, PyTorch), asegúrate de que:
-- Están instalados en el entorno del usuario
-- O están empaquetados con PyInstaller
+If you use native Python modules (TensorFlow, PyTorch), ensure that:
+- They are installed in the end user's environment, **or**
+- They are bundled via PyInstaller
 
-### ⚠️ Tamaño del Instalador
+### ⚠️ Installer Size
 
-El instalador puede ser grande (~100-300MB) debido a:
-- Electron runtime (~80MB)
-- Dependencias de Python
-- Modelos pre-cargados (si los hay)
+The installer may be large (~100–300 MB) due to:
+- Electron runtime (~80 MB)
+- Python dependencies
+- Any pre-loaded models
 
 ---
 
-## 🐛 Solución de Problemas
+## 🐛 Troubleshooting
 
-### Error: "icon.ico not found"
+### Error: `icon.ico not found`
 
-**Solución:**
 ```cmd
-# Crear carpeta build si no existe
-mkdir build
+# Create the build folder if it doesn't exist
+mkdir assets
 
-# Crear un icono placeholder o copiar uno existente
-copy icon.png build\icon.ico
+# Copy an existing icon or create a placeholder
+copy icon.png assets\icon.ico
 ```
 
-### Error: "Python not found"
+### Error: `Python not found`
 
-**Solución:**
-- Asegúrate de que Python esté en el PATH del sistema
-- O especifica la ruta completa en `main.js`
+- Make sure Python is on the system `PATH`
+- Or specify the full Python path in `main.js`
 
-### Build muy lento
+### Build is very slow
 
-**Solución:**
-- Excluye carpetas innecesarias en `.gitignore` y `package.json`
-- Usa `npm run pack` para testing (más rápido)
+- Exclude unnecessary folders via `.gitignore` and `package.json` `files` filter
+- Use `npm run pack` for faster test builds (no installer generated)
 
-### Instalador no arranca el backend
+### Installer does not start the backend
 
-**Solución:**
-- Verifica que `backend/requirements.txt` esté incluido
-- Confirma que el PATH de Python es correcto en el ejecutable
+- Verify `backend/requirements.txt` is included in the package
+- Confirm the Python `PATH` is correctly resolved in the executable
 
 ---
 
-## 🎉 Distribución
+## 🎉 Distribution
 
-Una vez generado el instalador:
+Once the installer is ready:
 
-1. **Prueba en otra máquina Windows limpia**
-2. **Documenta requisitos del sistema:**
+1. **Test on a clean Windows machine** (without your development setup)
+2. **Document system requirements:**
    - Windows 10/11 (64-bit)
-   - Python 3.8+ (si no está embebido)
-   - 4GB RAM mínimo
-   - 500MB espacio en disco
-
-3. **Distribuye:**
-   - Sube a GitHub Releases
-   - Comparte el instalador .exe
-   - Incluye README con instrucciones
+   - Python 3.11+ (if not bundled)
+   - 4 GB RAM minimum
+   - 500 MB available disk space
+3. **Distribute:**
+   - Upload to GitHub Releases
+   - Share the `.exe` installer
+   - Include a README with setup instructions
 
 ---
 
-## 📚 Referencias
+## 📚 References
 
-- [Electron Builder Docs](https://www.electron.build/)
+- [Electron Builder Documentation](https://www.electron.build/)
 - [NSIS Installer](https://nsis.sourceforge.io/)
-- [PyInstaller Docs](https://pyinstaller.org/)
+- [PyInstaller Documentation](https://pyinstaller.org/)
 
 ---
 
-*Última actualización: Febrero 2026*
+*Last updated: March 2026*

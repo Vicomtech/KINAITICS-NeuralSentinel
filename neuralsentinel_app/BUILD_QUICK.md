@@ -1,111 +1,102 @@
-# 🚀 Instrucciones para Generar el Ejecutable de Windows
+# 🚀 Quick Build Guide — Windows Executable
 
-## Método Rápido (Script Automático)
-
-### Opción 1: Usar el Script de Build
+## Method 1: Automatic Build Script (Recommended)
 
 ```cmd
 build-windows.bat
 ```
 
-Este script instala todo y genera el ejecutable automáticamente.
+This script installs all dependencies and generates the installer automatically.
 
 ---
 
-## Método Manual (Paso a Paso)
+## Method 2: Manual Build (Step by Step)
 
-Si el script automático no funciona, sigue estos pasos:
+Use this if the automatic script fails.
 
-### Paso 1: Habilitar Scripts de PowerShell (Solo si hay error)
+### Step 1: Enable PowerShell Scripts (only if you see a script error)
 
-Si ves error "scripts is disabled", ejecuta esto **como Administrador**:
+If you get a "scripts is disabled" error, run this **as Administrator**:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Paso 2: Instalar Dependencias
+### Step 2: Install Node.js Dependencies
 
 ```cmd
 npm install
 ```
 
-### Paso 3: Construir el Ejecutable
+### Step 3: Build the Executable
 
 ```cmd
 npm run build:win
 ```
 
-Espera 2-5 minutos mientras se genera el instalador.
+Wait 2–5 minutes for the installer to be generated.
 
-### Paso 4: Encontrar el Instalador
+### Step 4: Locate the Installer
 
-El ejecutable estará en:
+The output will be at:
 ```
-dist\ML Auditor-1.0.0-Setup.exe
+dist\NeuralSentinel-1.0.0-Setup.exe
 ```
 
 ---
 
-## 📦 Archivos Generados
+## 📦 Generated Files
 
-Después del build encontrarás en `dist/`:
+After the build you will find the following in `dist/`:
 
-- **ML Auditor-1.0.0-Setup.exe** ← Instalador (recomendado)
-- **ML Auditor-1.0.0-portable.exe** ← Versión portable
-- **win-unpacked/** ← Versión desempaquetada (para testing)
-
----
-
-## ✅ Probar el Instalador
-
-1. Ve a la carpeta `dist`
-2. Ejecuta `ML Auditor-1.0.0-Setup.exe`
-3. Sigue el asistente de instalación
-4. La aplicación se instalará en `C:\Program Files\ML Auditor\`
+- **NeuralSentinel-1.0.0-Setup.exe** ← Full installer (recommended)
+- **NeuralSentinel-1.0.0-portable.exe** ← Portable version
+- **win-unpacked/** ← Unpacked directory (useful for testing)
 
 ---
 
-## ⚠️ Notas Importantes
+## ✅ Testing the Installer
 
-### Python Requerido
-
-El ejecutable **NO incluye Python**. Los usuarios deben tener:
-- Python 3.8 o superior instalado
-- Las dependencias de `backend/requirements.txt` instaladas
-
-### Primera Ejecución
-
-Al ejecutar por primera vez:
-1. El backend Python iniciará automáticamente
-2. Electron abrirá la interfaz
-3. Puede tardar 10-15 segundos en cargar
+1. Navigate to the `dist` folder.
+2. Run `NeuralSentinel-1.0.0-Setup.exe`.
+3. Follow the installation wizard.
+4. The application will be installed in `C:\Program Files\NeuralSentinel\`.
 
 ---
 
-## 🐛 Si hay Problemas
+## ⚠️ Important Notes
 
-### Error: "npm command not found"
-**Solución:** Instala Node.js desde https://nodejs.org/
+### Python Runtime
 
-### Error: "icon.ico not found"
-**Solución:** Ya está solucionado, se genera automáticamente
+The Electron installer **does NOT bundle Python**. End users must have:
+- Python 3.11 or higher installed and available on `PATH`
+- All dependencies from `backend/requirements.txt` installed
 
-### Error: Build muy lento
-**Solución:** Normal, puede tardar 5-10 minutos en la primera vez
+### First Launch
 
-### El instalador no arranca
-**Solución:** 
-- Verifica que Python esté en el PATH
-- Reinstala las dependencias: `cd backend && pip install -r requirements.txt`
-
----
-
-## 📊 Tamaño Estimado
-
-- **Instalador:** ~150-200 MB
-- **Instalación completa:** ~300-400 MB
+On the first run:
+1. The Python backend starts automatically.
+2. Electron opens the UI window.
+3. Initial load may take 10–15 seconds.
 
 ---
 
-**¿Necesitas ayuda?** Revisa `BUILD.md` para la guía completa.
+## 🐛 Common Issues
+
+| Error | Solution |
+|---|---|
+| `npm command not found` | Install Node.js from https://nodejs.org/ |
+| `icon.ico not found` | Already handled — generated automatically |
+| Build is very slow | Normal on first run; may take 5–10 minutes |
+| Installer does not launch backend | Verify Python is on `PATH`; reinstall deps: `cd backend && pip install -r requirements.txt` |
+
+---
+
+## 📊 Size Estimates
+
+- **Installer:** ~150–200 MB
+- **Installed application:** ~300–400 MB
+
+---
+
+> For the full build guide, see [BUILD.md](BUILD.md).
