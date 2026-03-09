@@ -411,7 +411,7 @@ class MyMetric(MetricPlugin):
 ### Bundled Plugins
 
 | Plugin | Type | Description | Included |
-|---|---|---|
+|---|---|---|---|
 | **NeuralStrength Lite** | `security` | Lightweight variant of NeuralStrength | ✅ |
 | **NeuralStrength** | `security, privacy, and fairness` | VICOMTECH's AI security library | ❌ |
 
