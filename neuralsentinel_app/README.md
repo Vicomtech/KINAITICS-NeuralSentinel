@@ -415,7 +415,7 @@ class MyMetric(MetricPlugin):
 | **NeuralStrength Lite** | `security` | Lightweight variant of NeuralStrength | ✅ |
 | **NeuralStrength** | `security, privacy, and fairness` | VICOMTECH's AI security library | ❌ |
 
-> NeuralStrength is a library featuring proprietary metrics designed to evaluate the `security, privacy, and fairness` of artificial neural networks. As this library is the Intellectual Property of **VICOMTECH**, it is not included in this open-source application. However, if you are interested in expanding the functionality of this tool using NeuralStrength, please feel free to contact us. 📩 [Contacto](https://www.vicomtech.org/es/)
+> NeuralStrength is a library featuring proprietary metrics designed to evaluate the `security, privacy, and fairness` of artificial neural networks. As this library is the Intellectual Property of **VICOMTECH**, it is not included in this open-source application. However, if you are interested in expanding the functionality of this tool using NeuralStrength, please feel free to contact us. 📩 [Contact](https://www.vicomtech.org/es/)
 
 ---
 
