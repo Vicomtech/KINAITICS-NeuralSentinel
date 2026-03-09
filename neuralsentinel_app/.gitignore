@@ -1,19 +1,36 @@
-# Node/Electron
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
 
-# Electron build output
+# Build outputs
 dist/
-out/
+build/
 
-# Python venv (virtualenv in the python_backend/venv folder)
-venv/
+# Data directories
+data/models/*
+data/datasets/*
+data/evaluations/*
+!data/models/.gitkeep
+!data/datasets/.gitkeep
+!data/evaluations/.gitkeep
 
-# OS-specific
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Python bytecode files
-*.pyc
-__pycache__/
+# Logs
+*.log
+backend/logs/

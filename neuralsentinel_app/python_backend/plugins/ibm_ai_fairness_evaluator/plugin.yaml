@@ -1,6 +1,0 @@
-name: ibm_ai_fairness_evaluator
-description: Computes fairness metrics using IBM AIF360 toolkit
-version: 1.0
-enabled: true
-functions:
-  - compute_fairness

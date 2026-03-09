@@ -1,73 +1,72 @@
 {
-  "name": "neuralsentinel-electron",
+  "name": "neuralsentinel",
   "version": "1.0.0",
-  "description": "NeuralSentinel Desktop application for managing and evaluating datasets and models.",
+  "description": "NeuralSentinel - ML Model Auditing Platform",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "electron . --dev",
     "build": "electron-builder",
-    "test": "jest"
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "pack": "electron-builder --dir"
   },
+  "author": "Neural Sentinel",
+  "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "js-yaml": "^4.1.0",
-    "numpy-parser": "^1.2.3",
-    "python-shell": "^5.0.0",
-    "sqlite3": "^5.1.7",
-    "xlsx": "^0.18.5"
+    "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.27.1",
-    "@babel/preset-env": "^7.27.2",
-    "electron": "^25.9.8",
-    "electron-builder": "^26.0.12",
-    "jest": "^29.7.0"
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
   },
   "build": {
-    "appId": "com.neuralsentinel.app",
+    "appId": "com.neuralsentinel.mlauditor",
+    "artifactName": "NeuralSentinel-${version}-Setup.${ext}",
     "productName": "NeuralSentinel",
+    "copyright": "Copyright © 2026 Neural Sentinel",
     "directories": {
-      "output": "dist"
+      "shortcutName": "NeuralSentinel",
+      "output": "dist",
+      "buildResources": "build"
     },
-  "files": [
-        "preload.js",
-        "main.js",
-        "renderer/**/*",
-        "node_modules/**/*",
-        "package.json",
-        
-        "python_backend/*.py",
-        "python_backend/core/**/*",
-        "python_backend/plugins/**/*",
-        "python_backend/userDatabase/**/*",
-        "python_backend/continuous_authentication/**/*",
-        
-        "!python_backend/python_embedded/**"
-      ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "src/**/*",
+      "backend/**/*",
+      "data/**/*",
+      "!backend/venv/**/*",
+      "!backend/__pycache__/**/*",
+      "!backend/**/*.pyc"
+    ],
     "extraResources": [
       {
-        "from": "python_backend",
-        "to": "python_backend",
+        "from": "backend",
+        "to": "backend",
         "filter": [
-          "**/*"
+          "**/*",
+          "!venv/**/*",
+          "!__pycache__/**/*",
+          "!**/*.pyc"
         ]
       }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "renderer/assets/icono_Vicomtech.ico"
-    },
-    "mac": {
-      "category": "public.app-category.productivity",
-      "target": "dmg",
-      "icon": "renderer/assets/icono_Vicomtech.icns"
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
     },
     "linux": {
-      "target": "AppImage",
-      "category": "Utility",
-      "icon": "renderer/assets/icono_Vicomtech.png"
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Development"
     }
-  },
-  "author": "Rocío Fernández <rfernandez@vicomtech.org>",
-  "license": "MIT"
+  }
 }

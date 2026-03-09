@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralSentinel - ML Auditor</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/components.css">
+</head>
+
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <img src="assets/logo.png" class="logo-icon" alt="Logo">
+            <h1 class="logo-text">NeuralSentinel</h1>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" data-view="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-view="models">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-label">Modelos</span>
+            </a>
+            <a href="#" class="nav-item" data-view="datasets">
+                <span class="nav-icon">📁</span>
+                <span class="nav-label">Datasets</span>
+            </a>
+            <a href="#" class="nav-item" data-view="evaluation">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Evaluación</span>
+            </a>
+            <a href="#" class="nav-item" data-view="results">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Resultados</span>
+            </a>
+            <a href="#" class="nav-item" data-view="plugins">
+                <span class="nav-icon">🔌</span>
+                <span class="nav-label">Plugins</span>
+            </a>
+            <a href="#" class="nav-item" data-view="settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Configuración</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="icon-button" id="menu-toggle">
+                    <span>☰</span>
+                </button>
+                <h2 class="page-title">Dashboard</h2>
+            </div>
+            <div class="header-right">
+                <div class="user-profile">
+                    <span class="user-name">Usuario</span>
+                    <div class="user-avatar">U</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Container -->
+        <div class="content-container" id="app-content">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="src/renderer/api.js?v=3"></script>
+    <script src="src/renderer/components/dashboard.js?v=3"></script>
+    <script src="src/renderer/components/models.js?v=3"></script>
+    <script src="src/renderer/components/datasets.js?v=3"></script>
+    <script src="src/renderer/components/evaluation.js?v=3"></script>
+    <script src="src/renderer/components/results.js?v=3"></script>
+    <script src="src/renderer/components/plugins.js?v=3"></script>
+    <script src="src/renderer/components/settings.js?v=3"></script>
+    <script src="src/renderer/app.js?v=3"></script>
+</body>
+
+</html>

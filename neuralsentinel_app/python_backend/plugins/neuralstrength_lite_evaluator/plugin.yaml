@@ -1,6 +1,0 @@
-name: neuralstrength_lite_evaluator
-description: Evaluates model robustness with lightweight attacks
-version: 1.0
-enabled: true
-functions:
-  - evaluate_robustness
