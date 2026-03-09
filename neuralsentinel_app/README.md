@@ -167,7 +167,6 @@ local_app/
 │   │
 │   └── plugins/             # Bundled metric plugins
 │       ├── base.py          # Abstract base class MetricPlugin
-│       ├── neuralstrength/  # Full NeuralStrength security library
 │       └── neuralstrength_lite/ # Lightweight NeuralStrength variant
 │
 ├── data/                    # Local data (generated at runtime)
@@ -300,7 +299,7 @@ description — Optional description
 {
   "model_id": "model-uuid",
   "dataset_id": "dataset-uuid",
-  "metrics": ["NeuralStrength", "AnotherMetric"]
+  "metrics": ["Metric1", "Metric2"]
 }
 ```
 
@@ -325,7 +324,7 @@ pending → running → completed
       "details": {},
       "warnings": [],
       "recommendations": [],
-      "visualization": "/api/evaluations/uuid/images/NeuralStrength.png"
+      "visualization": "/api/evaluations/uuid/images/Metric1.png"
     }
   }
 }
@@ -411,10 +410,12 @@ class MyMetric(MetricPlugin):
 
 ### Bundled Plugins
 
-| Plugin | Type | Description |
+| Plugin | Type | Description | Included |
 |---|---|---|
-| **NeuralStrength** | `security` | Advanced adversarial robustness evaluation |
-| **NeuralStrength Lite** | `security` | Lightweight variant of NeuralStrength |
+| **NeuralStrength Lite** | `security` | Lightweight variant of NeuralStrength | ✅ |
+| **NeuralStrength** | `security, privacy, and fairness` | VICOMTECH's AI security library | ❌ |
+
+> NeuralStrength is a library featuring proprietary metrics designed to evaluate the `security, privacy, and fairness` of artificial neural networks. As this library is the Intellectual Property of **VICOMTECH**, it is not included in this open-source application. However, if you are interested in expanding the functionality of this tool using NeuralStrength, please feel free to contact us. 📩 [Contacto](https://www.vicomtech.org/es/)
 
 ---
 
