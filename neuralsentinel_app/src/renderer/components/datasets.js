@@ -3,10 +3,10 @@ window.renderDatasets = function (container) {
     container.innerHTML = `
         <div class="card mb-2">
             <div class="card-header">
-                <h3 class="card-title">Gestión de Datasets</h3>
+                <h3 class="card-title">Dataset Management</h3>
                 <button class="btn btn-primary" onclick="showUploadDatasetDialog()">
                     <span>📤</span>
-                    Cargar Dataset
+                    Upload Dataset
                 </button>
             </div>
         </div>
@@ -17,38 +17,38 @@ window.renderDatasets = function (container) {
         <div id="uploadDatasetModal" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
             <div class="card" style="width: 600px; max-width: 90%;">
                 <div class="card-header">
-                    <h3 class="card-title">Cargar Dataset</h3>
+                    <h3 class="card-title">Upload Dataset</h3>
                     <button onclick="closeUploadDatasetDialog()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label class="form-label">Nombre del Dataset</label>
-                        <input type="text" class="form-input" id="datasetName" placeholder="Mi dataset de validación">
+                        <label class="form-label">Dataset Name</label>
+                        <input type="text" class="form-input" id="datasetName" placeholder="My validation dataset">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Archivo de Datos (Features/X)</label>
+                        <label class="form-label">Data File (Features/X)</label>
                         <input type="file" class="form-input" id="datasetFile" accept=".npy,.npz">
                         <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                            Archivo principal con los datos de entrada (ejemplos: imágenes, features)
+                            Primary input data file (examples: images, features)
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Archivo de Etiquetas (Labels/y)</label>
+                        <label class="form-label">Labels File (Labels/y)</label>
                         <input type="file" class="form-input" id="datasetLabels" accept=".npy,.npz">
                         <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                            Archivo con las etiquetas correspondientes (debe tener la misma longitud que los datos)
+                            File with corresponding labels (must have the same length as the data)
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Descripción (opcional)</label>
-                        <textarea class="form-textarea" id="datasetDescription" placeholder="Descripción del dataset..."></textarea>
+                        <label class="form-label">Description (optional)</label>
+                        <textarea class="form-textarea" id="datasetDescription" placeholder="Dataset description..."></textarea>
                     </div>
                     <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button class="btn btn-secondary" onclick="closeUploadDatasetDialog()">Cancelar</button>
-                        <button class="btn btn-primary" onclick="uploadDataset()">Cargar</button>
+                        <button class="btn btn-secondary" onclick="closeUploadDatasetDialog()">Cancel</button>
+                        <button class="btn btn-primary" onclick="uploadDataset()">Upload</button>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@ window.renderDatasets = function (container) {
         <div id="datasetViewModal" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
             <div class="card" style="width: 900px; max-width: 95%; height: 85vh; display: flex; flex-direction: column;">
                 <div class="card-header">
-                    <h3 class="card-title">Vista Previa del Dataset</h3>
+                    <h3 class="card-title">Dataset Preview</h3>
                     <button onclick="closeDatasetViewDialog()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
                 </div>
                 <div class="card-body" style="flex: 1; overflow-y: auto; padding: 0; display: flex; flex-direction: column;">
@@ -86,12 +86,12 @@ async function loadDatasets() {
                 <div class="card">
                     <div class="empty-state">
                         <div class="empty-state-icon">📁</div>
-                        <div class="empty-state-title">No hay datasets cargados</div>
+                        <div class="empty-state-title">No datasets loaded</div>
                         <div class="empty-state-text">
-                            Carga tu primer dataset en formato NumPy (.npy, .npz) para comenzar
+                            Upload your first NumPy dataset (.npy, .npz) to get started
                         </div>
                         <button class="btn btn-primary" onclick="showUploadDatasetDialog()">
-                            Cargar Dataset
+                            Upload Dataset
                         </button>
                     </div>
                 </div>
@@ -104,12 +104,12 @@ async function loadDatasets() {
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Formato</th>
-                            <th>Tamaño</th>
-                            <th>Etiquetas</th>
-                            <th>Fecha de Carga</th>
-                            <th>Acciones</th>
+                            <th>Name</th>
+                            <th>Format</th>
+                            <th>Size</th>
+                            <th>Labels</th>
+                            <th>Upload Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,12 +122,12 @@ async function loadDatasets() {
                                 <td><span class="badge badge-info">${dataset.format || '.npy'}</span></td>
                                 <td>${(dataset.size / 1024 / 1024).toFixed(2)} MB</td>
                                 <td>
-                                    ${dataset.has_labels ? '<span class="badge badge-success">✓ Incluidas</span>' : '<span class="badge badge-warning">Sin etiquetas</span>'}
+                                    ${dataset.has_labels ? '<span class="badge badge-success">✓ Included</span>' : '<span class="badge badge-warning">No labels</span>'}
                                 </td>
                                 <td>${new Date(dataset.upload_date).toLocaleDateString()}</td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="viewDataset('${dataset.id}')">Ver</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteDataset('${dataset.id}')">Eliminar</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="viewDataset('${dataset.id}')">View</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteDataset('${dataset.id}')">Delete</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -139,7 +139,7 @@ async function loadDatasets() {
         container.innerHTML = `
             <div class="alert alert-danger">
                 <span>⚠️</span>
-                <div>Error al cargar datasets: ${error.message}</div>
+                <div>Error loading datasets: ${error.message}</div>
             </div>
         `;
     }
@@ -164,7 +164,7 @@ async function uploadDataset() {
     const description = document.getElementById('datasetDescription').value.trim();
 
     if (!name || !dataFile) {
-        alert('Por favor completa el nombre y selecciona el archivo de datos');
+        alert('Please enter a name and select a data file');
         return;
     }
 
@@ -186,23 +186,23 @@ async function uploadDataset() {
         loadDatasets();
 
         if (labelsFile) {
-            alert('Dataset cargado exitosamente con datos y etiquetas');
+            alert('Dataset uploaded successfully with data and labels');
         } else {
-            alert('Dataset cargado exitosamente (sin etiquetas)');
+            alert('Dataset uploaded successfully (without labels)');
         }
     } catch (error) {
-        alert('Error al cargar dataset: ' + error.message);
+        alert('Error uploading dataset: ' + error.message);
     }
 }
 
 async function deleteDataset(id) {
-    if (!confirm('¿Estás seguro de eliminar este dataset?')) return;
+    if (!confirm('Are you sure you want to delete this dataset?')) return;
 
     try {
         await window.api.deleteDataset(id);
         loadDatasets();
     } catch (error) {
-        alert('Error al eliminar dataset: ' + error.message);
+        alert('Error deleting dataset: ' + error.message);
     }
 }
 
@@ -217,7 +217,7 @@ window.viewDataset = async function (id) {
 
     modal.classList.remove('hidden');
 
-    metadataEl.innerHTML = 'Cargando metadatos...';
+    metadataEl.innerHTML = 'Loading metadata...';
     contentEl.innerHTML = '<div class="spinner" style="margin: 2rem auto;"></div>';
 
     try {
@@ -228,8 +228,8 @@ window.viewDataset = async function (id) {
         metadataEl.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-size: 0.9rem;">
                 <div><strong>Forma (Shape):</strong> ${preview.shape}</div>
-                <div><strong>Tipo de Dato (DType):</strong> ${preview.dtype}</div>
-                <div><strong>Tipo de Vista:</strong> <span class="badge badge-info">${preview.type === 'images' ? 'Imágenes' : 'Tabla'}</span></div>
+                <div><strong>Data Type (DType):</strong> ${preview.dtype}</div>
+                <div><strong>View Type:</strong> <span class="badge badge-info">${preview.type === 'images' ? 'Images' : 'Table'}</span></div>
             </div>
         `;
 
@@ -243,13 +243,13 @@ window.viewDataset = async function (id) {
                         </div>
                     `).join('')}
                 </div>
-                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">Mostrando primeros ${preview.data.length} elementos</p>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">Showing first ${preview.data.length} items</p>
             `;
         } else {
             // Tabular View
             const rows = preview.data;
             if (!rows || rows.length === 0) {
-                contentEl.innerHTML = '<p>Dataset vacío</p>';
+                contentEl.innerHTML = '<p>Empty dataset</p>';
                 return;
             }
 
@@ -281,14 +281,14 @@ window.viewDataset = async function (id) {
             tableHtml += '</tbody></table>';
             contentEl.innerHTML = `
                 <div style="overflow-x: auto;">${tableHtml}</div>
-                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">Mostrando primeros ${rows.length} elementos</p>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">Showing first ${rows.length} items</p>
             `;
         }
 
     } catch (error) {
         contentEl.innerHTML = `
             <div class="alert alert-error">
-                <strong>Error:</strong> No se pudo cargar la vista previa: ${error.message}
+                <strong>Error:</strong> Could not load preview: ${error.message}
             </div>
         `;
     }

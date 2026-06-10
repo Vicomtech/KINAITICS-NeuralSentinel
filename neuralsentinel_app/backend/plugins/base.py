@@ -33,7 +33,7 @@ class MetricPlugin(ABC):
         """
         pass
 
-    def call(self, dataset) -> dict:
+    def call(self, inputs, labels) -> dict:
         """
         Compute the metric on the dataset.
 
@@ -58,13 +58,13 @@ class MetricPlugin(ABC):
             "Subclasses must implement either 'call' or '__call__'."
         )
 
-    def __call__(self, dataset) -> dict:
+    def __call__(self, inputs, labels) -> dict:
         """
         Allows the plugin instance to be called directly like a function.
         Delegates to call() if that method has been overridden.
         """
         if type(self).call is not MetricPlugin.call:
-            return self.call(dataset)
+            return self.call(inputs, labels)
         raise NotImplementedError(
             "Subclasses must implement either 'call' or '__call__'."
         )

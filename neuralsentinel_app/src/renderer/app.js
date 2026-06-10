@@ -36,12 +36,12 @@ class App {
         // Update page title
         const titles = {
             dashboard: 'Dashboard',
-            models: 'Gestión de Modelos',
-            datasets: 'Gestión de Datasets',
-            evaluation: 'Evaluación',
-            results: 'Resultados',
+            models: 'Model Management',
+            datasets: 'Dataset Management',
+            evaluation: 'Evaluation',
+            results: 'Results',
             plugins: 'Plugins',
-            settings: 'Configuración'
+            settings: 'Settings'
         };
         document.querySelector('.page-title').textContent = titles[viewName];
 
@@ -74,7 +74,7 @@ class App {
                     window.renderResults(container);
                 } else {
                     console.error('renderResults function not found in window scope!');
-                    container.innerHTML = '<div class="alert alert-danger">Error: No se pudo cargar la vista de Resultados. Verifica la consola.</div>';
+                    container.innerHTML = '<div class="alert alert-danger">Error: No se pudo cargar la vista de Results. Verifica la consola.</div>';
                 }
                 break;
             case 'plugins':
@@ -84,7 +84,7 @@ class App {
                 if (window.renderSettings) window.renderSettings(container);
                 break;
             default:
-                container.innerHTML = '<div class="empty-state"><h2>Vista no encontrada</h2></div>';
+                container.innerHTML = '<div class="empty-state"><h2>View not found</h2></div>';
         }
     }
 
@@ -104,8 +104,8 @@ class App {
             <div class="alert alert-danger">
                 <span>⚠️</span>
                 <div>
-                    <strong>Error de conexión</strong><br>
-                    No se pudo conectar con el backend de Python. Asegúrate de que esté ejecutándose.
+                    <strong>Connection error</strong><br>
+                    Could not connect to the Python backend. Make sure it is running.
                     <br><br>
                     <code>cd backend && python app.py</code>
                 </div>

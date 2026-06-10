@@ -5,10 +5,10 @@ window.renderDashboard = function (container) {
             <!-- Metric Cards -->
             <div class="metric-card">
                 <div class="metric-info">
-                    <div class="metric-label">Modelos Cargados</div>
+                    <div class="metric-label">Loaded Models</div>
                     <div class="metric-value" id="totalModels">0</div>
                     <div class="metric-trend positive">
-                        ↑ Listo para evaluar
+                        ↑ Ready to evaluate
                     </div>
                 </div>
                 <div class="metric-icon yellow">🧠</div>
@@ -19,7 +19,7 @@ window.renderDashboard = function (container) {
                     <div class="metric-label">Datasets</div>
                     <div class="metric-value" id="totalDatasets">0</div>
                     <div class="metric-trend positive">
-                        ↑ Disponibles
+                        ↑ Available
                     </div>
                 </div>
                 <div class="metric-icon cyan">📁</div>
@@ -27,10 +27,10 @@ window.renderDashboard = function (container) {
 
             <div class="metric-card">
                 <div class="metric-info">
-                    <div class="metric-label">Evaluaciones</div>
+                    <div class="metric-label">Evaluations</div>
                     <div class="metric-value" id="totalEvaluations">0</div>
                     <div class="metric-trend">
-                        Completadas
+                        Completed
                     </div>
                 </div>
                 <div class="metric-icon green">📊</div>
@@ -41,7 +41,7 @@ window.renderDashboard = function (container) {
                     <div class="metric-label">Plugins</div>
                     <div class="metric-value" id="totalPlugins">0</div>
                     <div class="metric-trend">
-                        Activos
+                        Active
                     </div>
                 </div>
                 <div class="metric-icon purple">🔌</div>
@@ -52,20 +52,20 @@ window.renderDashboard = function (container) {
         <div class="grid grid-cols-2">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Modelos Recientes</h3>
+                    <h3 class="card-title">Recent Models</h3>
                     <button class="btn btn-outline btn-sm" onclick="app.switchView('models')">
-                        Ver todos
+                        View all
                     </button>
                 </div>
                 <div class="card-body" id="recentModels">
                     <div class="empty-state">
                         <div class="empty-state-icon">🧠</div>
-                        <div class="empty-state-title">No hay modelos cargados</div>
+                        <div class="empty-state-title">No models loaded</div>
                         <div class="empty-state-text">
-                            Sube tu primer modelo de TensorFlow o PyTorch
+                            Upload your first TensorFlow or PyTorch model
                         </div>
                         <button class="btn btn-primary" onclick="app.switchView('models')">
-                            Cargar Modelo
+                            Upload Model
                         </button>
                     </div>
                 </div>
@@ -73,20 +73,20 @@ window.renderDashboard = function (container) {
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Evaluaciones Recientes</h3>
+                    <h3 class="card-title">Evaluations Recientes</h3>
                     <button class="btn btn-outline btn-sm" onclick="window.app.switchView('results')">
-                        Ver todas
+                        View all
                     </button>
                 </div>
                 <div class="card-body" id="recentEvaluations">
                     <div class="empty-state">
                         <div class="empty-state-icon">📈</div>
-                        <div class="empty-state-title">No hay evaluaciones</div>
+                        <div class="empty-state-title">No evaluations yet</div>
                         <div class="empty-state-text">
-                            Crea tu primera auditoría de modelo
+                            Create your first model audit
                         </div>
                         <button class="btn btn-primary" onclick="app.switchView('evaluation')">
-                            Nueva Evaluación
+                            New Evaluation
                         </button>
                     </div>
                 </div>
@@ -96,21 +96,21 @@ window.renderDashboard = function (container) {
         <!-- Quick Actions -->
         <div class="card mt-2">
             <div class="card-header">
-                <h3 class="card-title">Acciones Rápidas</h3>
+                <h3 class="card-title">Quick Actions</h3>
             </div>
             <div class="card-body">
                 <div class="grid grid-cols-3">
                     <button class="btn btn-outline btn-lg" onclick="app.switchView('models')">
                         <span>📤</span>
-                        Cargar Modelo
+                        Upload Model
                     </button>
                     <button class="btn btn-outline btn-lg" onclick="app.switchView('datasets')">
                         <span>📥</span>
-                        Cargar Dataset
+                        Upload Dataset
                     </button>
                     <button class="btn btn-primary btn-lg" onclick="app.switchView('evaluation')">
                         <span>🚀</span>
-                        Nueva Evaluación
+                        New Evaluation
                     </button>
                 </div>
             </div>
@@ -167,9 +167,9 @@ async function loadDashboardData() {
                     ${recentEvals.map(evaluationItem => `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-light); border-radius: var(--radius-md);">
                             <div>
-                                <div style="font-weight: 600;">${evaluationItem.model_name || 'Evaluación'}</div>
+                                <div style="font-weight: 600;">${evaluationItem.model_name || 'Evaluation'}</div>
                                 <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                                    ${new Date(evaluationItem.start_time).toLocaleDateString()} • ${evaluationItem.metrics.length} métricas
+                                    ${new Date(evaluationItem.start_time).toLocaleDateString()} • ${evaluationItem.metrics.length} metrics
                                 </div>
                             </div>
                             <span class="badge badge-${evaluationItem.status === 'completed' ? 'success' : 'warning'}">

@@ -24,19 +24,19 @@ const metricTypeConfig = {
     security: {
         id: 'security',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-        label: 'Seguridad',
+        label: 'Security',
         colors: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', bar: '#ef4444' }
     },
     privacy: {
         id: 'privacy',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-        label: 'Privacidad',
+        label: 'Privacy',
         colors: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af', bar: '#3b82f6' }
     },
     fairness: {
         id: 'fairness',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v19"/><path d="M5 8h14"/><path d="M2 13h4"/><path d="M18 13h4"/></svg>`,
-        label: 'Equidad',
+        label: 'Fairness',
         colors: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e', bar: '#f59e0b' }
     }
 };
@@ -59,12 +59,12 @@ window.renderEvaluation = function (container) {
     container.innerHTML = `
         <div class="card mb-2">
             <div class="card-header">
-                <h3 class="card-title">Nueva Evaluación de Modelo</h3>
+                <h3 class="card-title">New Model Evaluation</h3>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
                     <span>ℹ️</span>
-                    <div>Configura los parámetros de la auditoría seleccionando el modelo, dataset y métricas a evaluar.</div>
+                    <div>Configure the audit by selecting the model, dataset, and metrics to evaluate.</div>
                 </div>
             </div>
         </div>
@@ -74,19 +74,19 @@ window.renderEvaluation = function (container) {
             <!-- Column 1: Model & Dataset Selection -->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">1️⃣ Seleccionar Datos</h4>
+                    <h4 class="card-title">1️⃣ Select Data</h4>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label class="form-label">Modelo</label>
+                        <label class="form-label">Model</label>
                         <select class="form-select" id="evalModel">
-                            <option value="">Cargando modelo...</option>
+                            <option value="">Loading model...</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Dataset</label>
                         <select class="form-select" id="evalDataset">
-                            <option value="">Cargando datasets...</option>
+                            <option value="">Loading datasets...</option>
                         </select>
                     </div>
                 </div>
@@ -95,23 +95,23 @@ window.renderEvaluation = function (container) {
             <!-- Column 2: Metrics Selection -->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">2️⃣ Seleccionar Métricas</h4>
+                    <h4 class="card-title">2️⃣ Select Metrics</h4>
                 </div>
                 <div class="card-body">
                     <div class="tabs">
                         <div class="tab active" data-tab="security" id="tab-security">
                             <span style="display: flex; align-items: center; gap: 0.5rem;">
-                                ${metricTypeConfig.security.icon} Seguridad
+                                ${metricTypeConfig.security.icon} Security
                             </span>
                         </div>
                         <div class="tab" data-tab="privacy" id="tab-privacy">
                             <span style="display: flex; align-items: center; gap: 0.5rem;">
-                                ${metricTypeConfig.privacy.icon} Privacidad
+                                ${metricTypeConfig.privacy.icon} Privacy
                             </span>
                         </div>
                         <div class="tab" data-tab="fairness" id="tab-fairness">
                             <span style="display: flex; align-items: center; gap: 0.5rem;">
-                                ${metricTypeConfig.fairness.icon} Equidad
+                                ${metricTypeConfig.fairness.icon} Fairness
                             </span>
                         </div>
                     </div>
@@ -125,18 +125,18 @@ window.renderEvaluation = function (container) {
             <!-- Column 3: Configuration Summary (Button only, progress moved down) -->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">3️⃣ Configuración</h4>
+                    <h4 class="card-title">3️⃣ Configuration</h4>
                 </div>
                 <div class="card-body">
                     <div id="selectedMetrics" style="margin-bottom: 1rem;">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Métricas Seleccionadas:</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Selected Metrics:</div>
                         <div id="selectedMetricsList" style="color: var(--text-secondary); font-size: 0.875rem;">
-                            ${getSession().selectedMetrics.length > 0 ? getSession().selectedMetrics.join(', ') : 'Ninguna métrica seleccionada'}
+                            ${getSession().selectedMetrics.length > 0 ? getSession().selectedMetrics.join(', ') : 'No metric selected'}
                         </div>
                     </div>
 
                     <button class="btn btn-primary btn-lg" style="width: 100%; font-weight: 600;" id="startEvalBtn">
-                        Iniciar Auditoría
+                        Start Audit
                     </button>
                     <!-- Rocket icon removed from button as requested -->
                 </div>
@@ -149,14 +149,14 @@ window.renderEvaluation = function (container) {
                 <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--border-color); padding: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 1.5rem;">
-                            <h4 class="card-title" style="margin: 0;">Estado de la Auditoría</h4>
+                            <h4 class="card-title" style="margin: 0;">Audit Status</h4>
                             <span id="evalStatusPercentage" style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color);">0%</span>
                         </div>
                         <span id="evalStatus" style="font-size: 0.95rem; color: var(--text-secondary); background: white; padding: 0.25rem 0.75rem; border-radius: 1rem; border: 1px solid var(--border-color);">
-                            Preparando...
+                            Preparing...
                         </span>
                         <button id="cancelEvalBtn" class="btn btn-outline-danger btn-sm" style="display: none;">
-                            Cancelar Evaluación
+                            Cancel Evaluation
                         </button>
                     </div>
                 </div>
@@ -176,16 +176,16 @@ window.renderEvaluation = function (container) {
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <h4 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-                                Monitor de Consola (Python)
+                                Console Monitor (Python)
                             </h4>
                             <span style="font-size: 0.75rem; color: var(--text-secondary); background: #f3f4f6; padding: 0.2rem 0.6rem; border-radius: 4px;">Live Stream</span>
                         </div>
                         <div id="logTerminal" style="background: #1e1e1e; color: #d4d4d4; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.8rem; padding: 1rem; border-radius: 8px; height: 300px; overflow-y: auto; line-height: 1.4; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); border: 1px solid #333;">
-                            <div style="color: #6a9955;">[SISTEMA] Esperando inicio de logs...</div>
+                            <div style="color: #6a9955;">[SYSTEM] Waiting for logs...</div>
                         </div>
                         <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
                             <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;">
-                                <input type="checkbox" id="autoScrollLogs" checked style="cursor: pointer;"> Autoscroll
+                                <input type="checkbox" id="autoScrollLogs" checked style="cursor: pointer;"> Auto-scroll
                             </label>
                         </div>
                     </div>
@@ -236,17 +236,17 @@ function setupEventListeners() {
             const session = getSession();
             if (!session.currentEvalId) return;
 
-            if (confirm('¿Estás seguro de que deseas cancelar la evaluación actual?')) {
+            if (confirm('Are you sure you want to cancel the current evaluation?')) {
                 try {
                     cancelBtn.disabled = true;
-                    cancelBtn.innerText = 'Chanceling...';
+                    cancelBtn.innerText = 'Cancelling...';
                     await window.api.cancelEvaluation(session.currentEvalId);
                     console.log('[Evaluation] Cancellation requested');
                 } catch (error) {
                     console.error('[Evaluation] Error cancelling:', error);
-                    alert('Error al cancelar la evaluación: ' + error.message);
+                    alert('Error cancelling evaluation: ' + error.message);
                     cancelBtn.disabled = false;
-                    cancelBtn.innerText = 'Cancelar Evaluación';
+                    cancelBtn.innerText = 'Cancel Evaluation';
                 }
             }
         });
@@ -272,8 +272,8 @@ async function loadEvaluationData() {
 
         if (modelSelect) {
             modelSelect.innerHTML = (models.length === 0)
-                ? '<option value="">No hay modelos cargados</option>'
-                : '<option value="">Selecciona un modelo...</option>' + models.map(m => `<option value="${m.id}">${m.name} (${m.framework})</option>`).join('');
+                ? '<option value="">No models loaded</option>'
+                : '<option value="">Select a model...</option>' + models.map(m => `<option value="${m.id}">${m.name} (${m.framework})</option>`).join('');
         }
 
         const datasets = await window.api.getDatasets();
@@ -281,8 +281,8 @@ async function loadEvaluationData() {
 
         if (datasetSelect) {
             datasetSelect.innerHTML = (datasets.length === 0)
-                ? '<option value="">No hay datasets cargados</option>'
-                : '<option value="">Selecciona un dataset...</option>' + datasets.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                ? '<option value="">No datasets loaded</option>'
+                : '<option value="">Select a dataset...</option>' + datasets.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
         }
 
         const plugins = await window.api.getPlugins();
@@ -307,7 +307,7 @@ function showMetricsForTab(tab) {
     if (metrics.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 1rem; color: var(--text-secondary);">
-                No hay plugins de ${tab} disponibles
+                No ${tab} plugins available
             </div>
         `;
         return;
@@ -373,7 +373,7 @@ function updateSelectedMetricsUI() {
     const session = getSession();
 
     if (session.selectedMetrics.length === 0) {
-        container.innerHTML = '<span style="color: var(--text-secondary);">Ninguna métrica seleccionada</span>';
+        container.innerHTML = '<span style="color: var(--text-secondary);">No metric selected</span>';
     } else {
         container.innerHTML = session.selectedMetrics.map(m => {
             const type = session.selectedMetricTypes[m] || 'security';
@@ -407,13 +407,13 @@ async function startEvaluation() {
     const progressDiv = document.getElementById('evaluationProgress');
 
     if (!modelId || !datasetId || session.selectedMetrics.length === 0) {
-        alert('Por favor completa todos los campos (modelo, dataset y al menos una métrica).');
+        alert('Please complete all fields (model, dataset, and at least one metric).');
         return;
     }
 
     btn.disabled = true;
     btn.style.opacity = '0.7';
-    btn.innerText = 'Iniciando...';
+    btn.innerText = 'Starting...';
 
     // Show full width progress section
     progressDiv.classList.remove('hidden');
@@ -422,7 +422,7 @@ async function startEvaluation() {
     // Initialize metric status grid IMMEDIATELY
     initializeMetricStatusDisplay();
 
-    document.getElementById('evalStatus').textContent = 'Iniciando evaluación...';
+    document.getElementById('evalStatus').textContent = 'Starting evaluation...';
     document.getElementById('evalProgressBar').style.width = '5%';
 
     try {
@@ -440,7 +440,7 @@ async function startEvaluation() {
         await window.api.startEvaluation(evaluation.id);
         console.log('[Evaluation] Evaluation started');
 
-        btn.innerText = 'Evaluando...';
+        btn.innerText = 'Evaluating...';
         document.getElementById('cancelEvalBtn').style.display = 'block';
 
         // Poll for results and logs
@@ -448,22 +448,22 @@ async function startEvaluation() {
 
         document.getElementById('evalProgressBar').style.width = '100%';
         document.getElementById('evalStatusPercentage').innerText = '100%';
-        document.getElementById('evalStatus').textContent = '¡Evaluación completada!';
+        document.getElementById('evalStatus').textContent = 'Evaluation completed!';
 
-        btn.innerText = '¡Completado!';
+        btn.innerText = 'Completed!';
         btn.classList.add('btn-success');
 
         setTimeout(() => {
-            alert('Evaluación completada exitosamente.');
+            alert('Evaluation completed successfully.');
             window.app.switchView('results');
         }, 1500);
 
     } catch (error) {
         console.error('[Evaluation] Error:', error);
-        alert('Error en la evaluación: ' + error.message);
+        alert('Evaluation error: ' + error.message);
         btn.disabled = false;
         btn.style.opacity = '1';
-        btn.innerText = 'Iniciar Auditoría';
+        btn.innerText = 'Start Audit';
     }
 }
 
@@ -493,7 +493,7 @@ function initializeMetricStatusDisplay() {
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary); padding-left: 0.5rem;">
-                    <span class="metric-status-text">Pendiente</span>
+                    <span class="metric-status-text">Pending</span>
                     <span class="metric-progress-text">0%</span>
                 </div>
 
@@ -518,7 +518,7 @@ async function checkAndResumeEvaluation() {
         if (progressDiv) progressDiv.classList.remove('hidden');
         if (startBtn) {
             startBtn.disabled = true;
-            startBtn.innerText = 'Auditoría en curso...';
+            startBtn.innerText = 'Audit in progress...';
         }
 
         // Repopulate Logs immediately from session
@@ -595,7 +595,7 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
                         color = '#f14c4c';
                     } else if (log.includes('WARNING')) {
                         color = '#cca700';
-                    } else if (log.includes('successfully') || log.includes('Completado')) {
+                    } else if (log.includes('successfully') || log.includes('Completed')) {
                         color = '#89d185';
                     }
 
@@ -622,7 +622,7 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
 
                 session.logIndex = logData.next_index;
 
-                // Autoscroll
+                // Auto-scroll
                 if (terminal) {
                     const autoScroll = document.getElementById('autoScrollLogs');
                     if (autoScroll && autoScroll.checked) {
@@ -648,12 +648,12 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
                     bar.style.width = `${progress}%`;
 
                     if (stateString === 'running') {
-                        statusText.innerText = 'Ejecutando análisis...';
+                        statusText.innerText = 'Running analysis...';
                         statusText.style.color = 'var(--primary-color)';
                         bar.classList.add('progress-bar-striped'); // Assuming we have or can add this CSS
                         bar.classList.add('progress-bar-animated');
                     } else if (stateString === 'completed') {
-                        statusText.innerText = '✅ Completado';
+                        statusText.innerText = '✅ Completed';
                         statusText.style.color = '#059669';
                         bar.style.backgroundColor = '#059669';
                     } else if (stateString === 'error') {
@@ -672,7 +672,7 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
             } else if (status.status === 'error' || status.status === 'cancelled') {
                 session.isPolling = false;
                 if (status.status === 'cancelled') {
-                    document.getElementById('evalStatus').textContent = '⚠️ Evaluación cancelada';
+                    document.getElementById('evalStatus').textContent = '⚠️ Evaluation cancelled';
                     document.getElementById('evalProgressBar').style.backgroundColor = '#f59e0b';
                 }
                 throw new Error(status.error || `Evaluation ${status.status}`);
@@ -689,7 +689,7 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
                 if (pc) pc.innerText = `${status.progress}%`;
 
                 if (st && status.status === 'running') {
-                    st.textContent = `Analizando vulnerabilidades y métricas...`;
+                    st.textContent = `Analyzing vulnerabilities and metrics...`;
                 }
 
                 // Show cancel button if running

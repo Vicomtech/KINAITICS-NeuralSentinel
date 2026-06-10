@@ -8,15 +8,15 @@ window.allEvaluations = [];
 const resultsMetricTypeConfig = {
     security: {
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-        label: 'Seguridad'
+        label: 'Security'
     },
     privacy: {
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-        label: 'Privacidad'
+        label: 'Privacy'
     },
     fairness: {
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v19"/><path d="M5 8h14"/><path d="M2 13h4"/><path d="M18 13h4"/></svg>`,
-        label: 'Equidad'
+        label: 'Fairness'
     }
 };
 
@@ -198,12 +198,12 @@ window.renderResults = function (container) {
 
         <div class="card mb-2">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 class="card-title" style="margin: 0;">Resultados de Evaluaciones</h3>
+                <h3 class="card-title" style="margin: 0;">Evaluation Results</h3>
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label for="modelFilter" style="font-weight: 500; font-size: 0.9rem;">Filtrar por Modelo:</label>
+                        <label for="modelFilter" style="font-weight: 500; font-size: 0.9rem;">Filter by Model:</label>
                         <select id="modelFilter" class="form-select" style="width: 200px; padding: 0.4rem;" onchange="filterEvaluations()">
-                            <option value="all">Todos los modelos</option>
+                            <option value="all">All models</option>
                         </select>
                     </div>
                     <button class="btn btn-secondary" onclick="loadEvaluationHistory()">
@@ -272,9 +272,9 @@ async function loadEvaluationHistory() {
             // Find all unique model IDs used in evaluations
             const usedModelIds = new Set(window.allEvaluations.map(e => e.model_id).filter(id => id));
 
-            filterSelect.innerHTML = '<option value="all">Todos los modelos</option>';
+            filterSelect.innerHTML = '<option value="all">All models</option>';
             usedModelIds.forEach(id => {
-                const name = modelMap.get(id) || `Modelo ${id.substring(0, 8)}...`;
+                const name = modelMap.get(id) || `Model ${id.substring(0, 8)}...`;
                 const option = document.createElement('option');
                 option.value = id;
                 option.textContent = name;
@@ -293,7 +293,7 @@ async function loadEvaluationHistory() {
         console.error('Error loading evaluation history:', error);
         container.innerHTML = `
             <div class="alert alert-error">
-                <strong>Error:</strong> No se pudo cargar el historial: ${error.message}
+                <strong>Error:</strong> Could not load history: ${error.message}
             </div>
         `;
     }
@@ -321,12 +321,12 @@ function renderFilteredEvaluations() {
             <div class="card">
                 <div class="card-body" style="text-align: center; padding: 3rem;">
                     <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
-                    <h3>No hay evaluaciones ${selectedModelId !== 'all' ? 'para este modelo' : 'completadas'}</h3>
+                    <h3>No evaluations ${selectedModelId !== 'all' ? 'for this model' : 'completed'}</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        Las evaluaciones que ejecutes aparecerán aquí
+                        Evaluations you run will appear here
                     </p>
                     <button class="btn btn-primary" onclick="window.app.switchView('evaluation')">
-                        Crear Nueva Evaluación
+                        Create New Evaluation
                     </button>
                 </div>
             </div>
@@ -342,14 +342,14 @@ function renderFilteredEvaluations() {
 }
 
 async function deleteEvaluation(id) {
-    if (!confirm('¿Estás seguro de eliminar esta evaluación? Esta acción no se puede deshacer.')) return;
+    if (!confirm('Are you sure you want to delete this evaluation? This action cannot be undone.')) return;
 
     try {
         await window.api.deleteEvaluation(id);
         // Reload to refresh the list and filters
         loadEvaluationHistory();
     } catch (error) {
-        alert('Error al eliminar evaluación: ' + error.message);
+        alert('Error deleting evaluation: ' + error.message);
     }
 }
 
@@ -358,7 +358,7 @@ window.deleteEvaluation = deleteEvaluation;
 
 function renderEvaluationCard(evaluation) {
     const date = new Date(evaluation.created_at);
-    const dateStr = date.toLocaleDateString('es-ES', {
+    const dateStr = date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -367,26 +367,26 @@ function renderEvaluationCard(evaluation) {
     });
 
     const statusBadge = {
-        'pending': '<span class="badge badge-warning">⏳ Pendiente</span>',
-        'running': '<span class="badge badge-info">🔄 Ejecutando</span>',
-        'completed': '<span class="badge badge-success">✓ Completado</span>',
+        'pending': '<span class="badge badge-warning">⏳ Pending</span>',
+        'running': '<span class="badge badge-info">🔄 Running</span>',
+        'completed': '<span class="badge badge-success">✓ Completed</span>',
         'error': '<span class="badge badge-danger">✗ Error</span>'
-    }[evaluation.status] || '<span class="badge">Desconocido</span>';
+    }[evaluation.status] || '<span class="badge">Unknown</span>';
 
     return `
         <div class="card mb-2">
             <div class="card-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h4 style="margin: 0;">Evaluación del ${dateStr}</h4>
+                        <h4 style="margin: 0;">Evaluation from ${dateStr}</h4>
                         <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                            ID: ${evaluation.id.substring(0, 8)}...  |  Modelo ID: ${evaluation.model_id ? evaluation.model_id.substring(0, 8) + '...' : 'Desconocido'}
+                            ID: ${evaluation.id.substring(0, 8)}...  |  Model ID: ${evaluation.model_id ? evaluation.model_id.substring(0, 8) + '...' : 'Unknown'}
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         ${statusBadge}
                         ${evaluation.status !== 'running' ? `
-                            <button class="btn-icon-danger" onclick="window.deleteEvaluation('${evaluation.id}')" title="Eliminar Evaluación">
+                            <button class="btn-icon-danger" onclick="window.deleteEvaluation('${evaluation.id}')" title="Delete Evaluation">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             </button>
                         ` : ''}
@@ -411,11 +411,11 @@ function renderPendingResults(evaluation) {
                     <div class="progress-bar" style="width: ${evaluation.progress || 0}%;"></div>
                 </div>
                 <button class="btn btn-primary btn-sm" onclick="window.resumeEvaluation('${evaluation.id}')" style="white-space: nowrap;">
-                    Ver progreso
+                    View progress
                 </button>
             </div>
             <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">
-                Estado: Ejecutando métricas... (${evaluation.progress || 0}%)
+                Estado: Running metrics... (${evaluation.progress || 0}%)
             </p>
         `;
     }
@@ -423,15 +423,15 @@ function renderPendingResults(evaluation) {
     if (evaluation.status === 'error') {
         return `
             <div class="alert alert-error">
-                <strong>Error en la evaluación:</strong>
-                <pre style="margin-top: 0.5rem; white-space: pre-wrap;">${evaluation.error || 'Error desconocido'}</pre>
+                <strong>Evaluation error:</strong>
+                <pre style="margin-top: 0.5rem; white-space: pre-wrap;">${evaluation.error || 'Unknown error'}</pre>
             </div>
         `;
     }
 
     return `
         <p style="color: var(--text-secondary);">
-            Evaluación pendiente de iniciar
+            Evaluation pending start
         </p>
     `;
 }
@@ -442,7 +442,7 @@ function renderCompletedResults(evaluation) {
     const metricsCount = Object.keys(results).length;
 
     if (metricsCount === 0) {
-        return '<p style="color: var(--text-secondary);">No hay resultados disponibles</p>';
+        return '<p style="color: var(--text-secondary);">No results available</p>';
     }
 
     // Group metrics by category
@@ -480,19 +480,19 @@ function renderCompletedResults(evaluation) {
 
     return `
         <div class="pillar-grid">
-            ${renderPillarColumn(resultsMetricTypeConfig.security.icon + ' Seguridad', groupedResults.security, evalId)}
-            ${renderPillarColumn(resultsMetricTypeConfig.privacy.icon + ' Privacidad', groupedResults.privacy, evalId)}
-            ${renderPillarColumn(resultsMetricTypeConfig.fairness.icon + ' Equidad', groupedResults.fairness, evalId)}
+            ${renderPillarColumn(resultsMetricTypeConfig.security.icon + ' Security', groupedResults.security, evalId)}
+            ${renderPillarColumn(resultsMetricTypeConfig.privacy.icon + ' Privacy', groupedResults.privacy, evalId)}
+            ${renderPillarColumn(resultsMetricTypeConfig.fairness.icon + ' Fairness', groupedResults.fairness, evalId)}
         </div>
         
         ${groupedResults.unknown.length > 0 ? renderPillarColumn('❓ Otros', groupedResults.unknown, evalId) : ''}
 
         <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
             <button class="btn btn-secondary btn-sm" onclick="viewEvaluationDetails('${evaluation.id}')">
-                👁️ Ver JSON Completo
+                👁️ View Full JSON
             </button>
             <button class="btn btn-primary btn-sm" onclick="downloadResults('${evaluation.id}')">
-                📥 Descargar Informe
+                📥 Download Report
             </button>
         </div>
     `;
@@ -515,7 +515,7 @@ function renderPillarColumn(title, metrics, evalId) {
         <div class="pillar-card">
             <div class="pillar-header">
                 <span class="pillar-title">${title}</span>
-                <span class="badge" style="background: var(--bg-secondary);">${metrics.length} métricas</span>
+                <span class="badge" style="background: var(--bg-secondary);">${metrics.length} metrics</span>
             </div>
             
             <div class="average-score" style="color: ${scoreColor}">
@@ -524,7 +524,7 @@ function renderPillarColumn(title, metrics, evalId) {
             
             <div class="metric-list">
                 ${metrics.length > 0 ? metrics.map((metric, index) => renderMetricItem(metric, evalId)).join('') :
-            '<p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sin métricas</p>'}
+            '<p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">Sin metrics</p>'}
             </div>
         </div>
     `;
@@ -595,7 +595,7 @@ window.openMetricModal = function (metricDataEncoded) {
         fullWin.document.write(`
             <html>
                 <head>
-                    <title>Visualización - ${metric.name}</title>
+                    <title>Visualization - ${metric.name}</title>
                     <style>
                         body { margin: 0; background: #1a1a1a; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
                         img { max-width: 95%; max-height: 95%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white; border-radius: 4px; }
@@ -605,10 +605,10 @@ window.openMetricModal = function (metricDataEncoded) {
                 </head>
                 <body>
                     <div class="toolbar">
-                        <span>${metric.name} - Visualización Completa</span>
+                        <span>${metric.name} - Full Visualization</span>
                         <a href="javascript:window.close()" class="btn-close">×</a>
                     </div>
-                    <img src="${src}" alt="Visualización completa">
+                    <img src="${src}" alt="Full visualization">
                 </body>
             </html>
         `);
@@ -638,7 +638,7 @@ window.openMetricModal = function (metricDataEncoded) {
                     <div style="font-size: 3rem; font-weight: 700; color: ${color};">
                         ${scoreVal}
                     </div>
-                    <div style="color: var(--text-secondary);">Puntuación General</div>
+                    <div style="color: var(--text-secondary);">Overall Score</div>
                 </div>
                 
                 ${metric.status === 'error' ? `
@@ -648,20 +648,20 @@ window.openMetricModal = function (metricDataEncoded) {
                 ` : ''}
                 
                 <div class="section" style="margin-bottom: 1.5rem;">
-                    <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">📊 Visualización</h4>
+                    <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">📊 Visualization</h4>
                     
                      ${vizSrc ? `
                         <div style="text-align: center; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-                            <img src="${vizSrc}" class="clickable-viz" onclick="window.openFullImage('${vizSrc}')" style="max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Haz clic para ver en grande" alt="Visualización de métrica">
-                            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">🔍 Haz clic para ampliar</div>
+                            <img src="${vizSrc}" class="clickable-viz" onclick="window.openFullImage('${vizSrc}')" style="max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Click to enlarge" alt="Metric visualization">
+                            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">🔍 Click to enlarge</div>
                         </div>
                     ` : `
                         <div id="viz-container-${metric.name.replace(/\s+/g, '-')}" style="text-align: center; padding: 1rem; background: #f9fafb; border-radius: 8px;">
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); toggleVisualization('${metric.name}', '${metric.evalId}')">
-                                <span style="margin-right:0.5rem;">👁️</span> Generar Visualización
+                                <span style="margin-right:0.5rem;">👁️</span> Generate Visualization
                             </button>
                             <div style="margin-top:0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
-                                Haz clic para generar la gráfica en tiempo real.
+                                Click to generate the chart in real time.
                             </div>
                         </div>
                     `}
@@ -670,7 +670,7 @@ window.openMetricModal = function (metricDataEncoded) {
                 <div style="display: grid; gap: 1.5rem;">
                     ${metric.details ? `
                         <div class="section">
-                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">📝 Detalles Técnicos</h4>
+                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">📝 Technical Details</h4>
                             <div style="background: #fcfcfc; border-radius: 8px; padding: 0.5rem; border: 1px solid #f0f0f0;">
                                 ${Object.entries(metric.details).map(([key, value]) => `
                                     <div class="detail-item">
@@ -683,7 +683,7 @@ window.openMetricModal = function (metricDataEncoded) {
                     
                     ${metric.warnings && metric.warnings.length > 0 ? `
                         <div class="section">
-                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">⚠️ Advertencias</h4>
+                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">⚠️ Warnings</h4>
                             <ul style="margin: 0; padding-left: 1.25rem; color: var(--warning-dark);">
                                 ${metric.warnings.map(w => `<li>${w}</li>`).join('')}
                             </ul>
@@ -692,7 +692,7 @@ window.openMetricModal = function (metricDataEncoded) {
                     
                     ${metric.recommendations && metric.recommendations.length > 0 ? `
                         <div class="section">
-                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">💡 Recomendaciones</h4>
+                            <h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">💡 Recommendations</h4>
                             <ul style="margin: 0; padding-left: 1.25rem; color: var(--text-primary);">
                                 ${metric.recommendations.map(r => `<li>${r}</li>`).join('')}
                             </ul>
@@ -717,19 +717,19 @@ window.toggleVisualization = async function (metricName, evalId) {
     // Check if already loaded
     if (container.querySelector('img')) return;
 
-    container.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><div style="font-size:0.8rem; margin-top:0.5rem;">Generando visualización...</div>';
+    container.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><div style="font-size:0.8rem; margin-top:0.5rem;">Generating visualization...</div>';
 
     try {
         const response = await fetch(`http://localhost:5000/api/evaluations/${evalId}/visualize/${metricName}`);
         const data = await response.json();
 
         if (response.status !== 200) {
-            throw new Error(data.error || 'Error desconocido');
+            throw new Error(data.error || 'Unknown error');
         }
 
         container.innerHTML = `
-            <img src="data:image/png;base64,${data.image}" class="clickable-viz" onclick="window.openFullImage('data:image/png;base64,${data.image}')" style="max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Haz clic para ver en grande" alt="Visualización">
-            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">🔍 Haz clic para ampliar</div>
+            <img src="data:image/png;base64,${data.image}" class="clickable-viz" onclick="window.openFullImage('data:image/png;base64,${data.image}')" style="max-width: 100%; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Click to enlarge" alt="Visualization">
+            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">🔍 Click to enlarge</div>
         `;
     } catch (e) {
         console.error(e);
@@ -737,7 +737,7 @@ window.toggleVisualization = async function (metricName, evalId) {
             <div class="alert alert-error" style="font-size: 0.8rem; text-align: left;">
                 <strong>Error:</strong> ${e.message}
                 <br>
-                <button class="btn btn-secondary btn-sm" style="margin-top:0.5rem;" onclick="toggleVisualization('${metricName}', '${evalId}')">Reintentar</button>
+                <button class="btn btn-secondary btn-sm" style="margin-top:0.5rem;" onclick="toggleVisualization('${metricName}', '${evalId}')">Retry</button>
             </div>`;
     }
 }
@@ -760,7 +760,7 @@ async function viewEvaluationDetails(evalId) {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Detalles de Evaluación - ${evalId.substring(0, 8)}</title>
+                <title>Evaluation Details - ${evalId.substring(0, 8)}</title>
                 <style>
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -778,13 +778,13 @@ async function viewEvaluationDetails(evalId) {
                 </style>
             </head>
             <body>
-                <h1>Detalles de Evaluación</h1>
+                <h1>Evaluation Details</h1>
                 <pre>${JSON.stringify(results, null, 2)}</pre>
             </body>
             </html>
         `);
     } catch (error) {
-        alert('Error al cargar detalles: ' + error.message);
+        alert('Error loading details: ' + error.message);
     }
 }
 window.viewEvaluationDetails = viewEvaluationDetails;
@@ -804,7 +804,7 @@ async function downloadResults(evalId) {
 
         URL.revokeObjectURL(url);
     } catch (error) {
-        alert('Error al descargar resultados: ' + error.message);
+        alert('Error downloading results: ' + error.message);
     }
 }
 window.downloadResults = downloadResults;

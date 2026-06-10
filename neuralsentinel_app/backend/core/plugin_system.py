@@ -1,6 +1,8 @@
 import importlib.util
+import importlib.machinery
 import inspect
 import os
+import re
 from pathlib import Path
 from typing import Dict, List
 from plugins.base import MetricPlugin
@@ -20,6 +22,37 @@ class PluginManager:
         
         self.discover_plugins()
     
+    def _is_compiled_extension(self, file_path: Path) -> bool:
+        """Check if a file is a compiled Python extension (.so or .pyd)"""
+        name = file_path.name
+        return name.endswith('.pyd') or (name.endswith('.so') and name != '__init__.so')
+    
+    def _get_module_name(self, file_path: Path) -> str:
+        """Extract the correct module name for importlib.
+        
+        For .py files: use the path-based name for uniqueness.
+        For compiled extensions (.so/.pyd): use just the base module name 
+        (before the platform suffix) because compiled modules export 
+        PyInit_<name> and the module name must match exactly.
+        """
+        if self._is_compiled_extension(file_path):
+            # Compiled extension: extract base module name
+            # e.g. "basic_iterative_method.cp311-win_amd64.pyd" -> "basic_iterative_method"
+            # e.g. "basic_iterative_method.cpython-311-x86_64-linux-gnu.so" -> "basic_iterative_method"
+            name = file_path.name
+            # The module name is everything before the first '.' if there are platform tags,
+            # or before the extension if it's just "name.pyd" / "name.so"
+            base_name = name.split('.')[0]
+            return base_name
+        else:
+            # .py file: use path-based name for uniqueness
+            try:
+                rel_path = file_path.relative_to(self.plugins_dir)
+                module_name = str(rel_path).replace(os.sep, '_').replace('.py', '')
+            except ValueError:
+                module_name = file_path.stem
+            return module_name
+    
     def discover_plugins(self):
         """Scan plugins directory recursively and load all valid plugins"""
         if not self.plugins_dir.exists():
@@ -30,28 +63,24 @@ class PluginManager:
         def is_ignored(path: Path) -> bool:
             return any(part.startswith('.') or part == '__pycache__' or part == 'venv' for part in path.parts)
 
-        # Recursively find all python files
-        for file_path in self.plugins_dir.rglob('*.py'):
-            if is_ignored(file_path):
-                continue
-            
-            if file_path.name == '__init__.py':
-                continue
+        # Recursively find all python files (.py) and compiled extensions (.so, .pyd)
+        plugin_extensions = ['*.py', '*.so', '*.pyd']
+        for ext_pattern in plugin_extensions:
+            for file_path in self.plugins_dir.rglob(ext_pattern):
+                if is_ignored(file_path):
+                    continue
+                
+                if file_path.name == '__init__.py':
+                    continue
 
-            try:
-                # We pass 'unknown' initially, the actual category is determined by the plugin manifest
-                self.load_plugin(file_path)
-            except Exception as e:
-                print(f"[Plugin Discovery] Skipping {file_path.name}: {type(e).__name__}: {e}")
+                try:
+                    self.load_plugin(file_path)
+                except Exception as e:
+                    print(f"[Plugin Discovery] Skipping {file_path.name}: {type(e).__name__}: {e}")
 
     def load_plugin(self, file_path: Path, category: str = None):
-        """Load a single plugin from file"""
-        # Create unique module name based on relative path to ensure no conflicts
-        try:
-            rel_path = file_path.relative_to(self.plugins_dir)
-            module_name = str(rel_path).replace(os.sep, '_').replace('.py', '')
-        except ValueError:
-            module_name = file_path.stem
+        """Load a single plugin from file (.py, .so or .pyd)"""
+        module_name = self._get_module_name(file_path)
 
         # Import module
         spec = importlib.util.spec_from_file_location(module_name, file_path)
