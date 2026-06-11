@@ -152,19 +152,88 @@ Default base URL: `http://localhost:5000/api`
 ## Plugin System
 
 Plugins are loaded by the backend and exposed by type (`security`, `privacy`, `fairness`).
+Each plugin must provide metadata (`manifest`) and execution logic for the selected metric.
 
 Supported upload formats:
 
 - `.py` – Python plugin file
 - `.so` – linux compiled plugin binary
 - `.pyd` – windows compiled plugin binary
-- `.zip` – plugin library package
+- `.zip` – plugin **library pack** (recommended for multi-metric packages)
 
-Each plugin must provide metadata (`manifest`) and execution logic for the selected metric.
+### Library packs and their `requirements.txt`
+
+A library pack groups several metrics plus their dependencies. Expected layout
+(inside the `.zip`, or as a folder under `backend/plugins/`):
+
+```text
+my_library/
+├── requirements.txt        # third-party deps for the metrics (optional)
+├── my_library-1.0-*.whl    # bundled private/compiled wheel (optional)
+├── security/   *.pyd | *.py
+├── privacy/    *.pyd | *.py
+└── fairness/   *.pyd | *.py
+```
+
+**Dependencies are incorporated automatically.** Whenever the plugin registry is
+discovered or reloaded — at backend startup *and* after any upload —
+`PluginManager` looks for a `requirements.txt` next to each pack and installs it
+into the backend's Python environment **before** importing the plugins, so the
+compiled metrics can `import` what they need (e.g. `numba`, `opencv-python`,
+`seaborn`) instead of being skipped. The install:
+
+- resolves the **full** dependency tree (no `--no-deps`);
+- runs with `--find-links <pack_dir>`, so a bundled `.whl` (e.g. a private
+  `neuralstrength` library) is installed offline from inside the pack;
+- writes a `.deps_installed` marker in the pack folder on success, so an
+  unchanged pack is **not** reinstalled on every reload/restart (edit
+  `requirements.txt` to force a fresh install).
+
+You add a pack in one of two ways:
+
+1. **UI:** *Plugins → Upload* the `.zip`. The backend extracts it, installs its
+   `requirements.txt`, reloads, and the metrics appear in their categories.
+2. **Filesystem:** drop the pack folder under `backend/plugins/` and hit
+   *Plugins → Reload* (or restart the backend).
+
+> **Windows note:** dependency install happens while the backend is running. If
+> a pin in `requirements.txt` forces pip to *replace* a package the live process
+> already imported (e.g. `numpy`/`scipy`), it can fail with a locked-file error.
+> In that case reload right after a fresh backend start, or install while the
+> backend is stopped. Watch for `[Plugin Deps]` lines in the backend log.
+
+## Deployment Overview
+
+NeuralSentinel runs as **two cooperating processes**:
+
+| Process | What it is | How it starts |
+| --- | --- | --- |
+| **Backend** | Flask API + plugin engine (`backend/app.py`), served on `http://localhost:5000` | `python app.py` (dev) or the bundled `backend/app.exe` (packaged) |
+| **Frontend** | Electron desktop app (`main.js` → `index.html`) | `npm run dev` (dev) or the installed app (packaged) |
+
+The Electron renderer talks to the backend over local HTTP only.
+
+**Local development** — install once (`install.bat` / `install.sh`, or the manual
+steps above), then launch both processes with `start.bat` / `start.sh` (they open
+the backend venv and the Electron app for you). Plugin **library packs** placed
+under `backend/plugins/` have their `requirements.txt` installed automatically on
+the next backend start/reload (see [Plugin System](#plugin-system)).
+
+**Packaged distribution** — `build-windows.bat` compiles the Flask backend to a
+single `backend/app.exe` with PyInstaller and then runs `npm run build:win`
+(electron-builder) to produce the installer. In a packaged build the backend exe
+is spawned by `main.js` and its plugins/requirements live alongside the bundled
+app, so end users do **not** need Python or Node installed.
 
 ## Build Packages
 
-- Windows build:
+- Windows build (full pipeline: backend exe + installer):
+
+```bash
+build-windows.bat
+```
+
+- Windows app only:
 
 ```bash
 npm run build:win
@@ -188,7 +257,7 @@ Build outputs are generated in `dist/`.
 
 For a complete step-by-step setup and usage guide, see:
 
-- `INSTALLATION_AND_USAGE_GUIDE.md`
+- [`GUIDE.md`](GUIDE.md)
 
 ## License
 

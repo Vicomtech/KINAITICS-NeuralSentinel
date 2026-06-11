@@ -10,9 +10,16 @@ def _install_pack_dependencies(target_dir):
     ``.whl`` files (e.g. a private ``neuralstrength`` wheel), install them into
     the *current* Python environment so the pack's plugins can import them.
 
-    ``--find-links <pack_dir>`` lets a bundled requirements.txt resolve against
-    the wheels shipped inside the pack, while still allowing pip to fetch any
-    public transitive dependencies from the configured index.
+    Installation runs with ``--no-deps`` on purpose: the backend process is
+    already running, and on Windows pip cannot replace/downgrade packages that
+    the live interpreter has imported (it fails with OSError while renaming
+    locked ``.pyc``/dist-info files). The pack therefore only adds the private
+    wheel itself; all third-party dependencies of the premium metrics must be
+    provisioned in the base environment (backend/requirements.txt), which is
+    installed once while the backend is stopped.
+
+    ``--find-links <pack_dir>`` lets a bundled requirements.txt resolve the
+    private wheel offline from inside the pack.
 
     Returns a summary dict, or None if there was nothing to install.
     """
@@ -27,7 +34,8 @@ def _install_pack_dependencies(target_dir):
     if not req_file.exists() and not wheels:
         return None
 
-    cmd = [sys.executable, '-m', 'pip', 'install', '--find-links', str(target_dir)]
+    cmd = [sys.executable, '-m', 'pip', 'install', '--no-deps',
+           '--find-links', str(target_dir)]
     if req_file.exists():
         cmd += ['-r', str(req_file)]
     else:
@@ -207,7 +215,7 @@ def upload_plugin():
 
             print(f"[Plugin Upload] Installing wheel: {save_path}")
             result = subprocess.run(
-                [sys.executable, '-m', 'pip', 'install', str(save_path)],
+                [sys.executable, '-m', 'pip', 'install', '--no-deps', str(save_path)],
                 capture_output=True, text=True
             )
             if result.returncode != 0:

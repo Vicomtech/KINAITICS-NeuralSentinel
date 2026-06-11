@@ -98,6 +98,17 @@ pip install -r requirements.txt
 
 ## 5. How to Run the App
 
+NeuralSentinel runs as **two cooperating processes**:
+
+- **Backend** — Flask API + plugin engine (`backend/app.py`) on `http://localhost:5000`.
+  In a packaged build this is the bundled `backend/app.exe`.
+- **Frontend** — Electron desktop app (`main.js` → `index.html`) that talks to the
+  backend over local HTTP only.
+
+In development you start both yourself (5.1); the `start` scripts (5.2) launch both
+for you. The backend must be up before the frontend can run evaluations, and it
+installs any plugin-pack dependencies on startup (see Section 8.3).
+
 ## 5.1 Development mode (two terminals)
 
 ### Terminal A: backend
@@ -200,20 +211,83 @@ Supported plugin upload formats:
 - `.py` (single Python plugin)
 - `.so` (linux compiled plugin)
 - `.pyd` (windows compiled plugin)
-- `.zip` (plugin library package)
-
-Plugin lifecycle:
-
-1. Upload in **Plugins**
-2. Reload plugin registry
-3. Confirm plugin appears in its category
-4. Use it from **Evaluation**
+- `.zip` (plugin **library pack** — recommended for multi-metric packages)
+- `.whl` (private/compiled library only, no plugin files)
 
 A plugin should provide:
 
-- Metadata/manifest
+- Metadata/manifest (`name`, `type`, `version`, `description`, `parameters`)
 - Metric execution implementation
 - Optional visualization output
+
+### 8.1 Single-file plugins
+
+Upload a `.py`/`.pyd`/`.so` in **Plugins → Upload**. It is stored under
+`backend/plugins/custom/`, the registry reloads, and the metric appears in its
+category. Use it from **Evaluation**.
+
+### 8.2 Library packs (multiple metrics + dependencies)
+
+A library pack bundles several metrics with the third-party packages they need.
+Expected folder layout (this is what you compress into the `.zip`, and also how
+it lives under `backend/plugins/` once extracted):
+
+```text
+my_library/
+├── requirements.txt        # third-party deps for the metrics (optional)
+├── my_library-1.0-*.whl    # bundled private/compiled wheel (optional)
+├── security/   *.pyd | *.py
+├── privacy/    *.pyd | *.py
+└── fairness/   *.pyd | *.py
+```
+
+A real example ships in the repo at
+`backend/plugins/neuralstrength/` (compiled `cp311-win_amd64` metrics + a private
+wheel + a `requirements.txt`).
+
+### 8.3 How `requirements.txt` is incorporated (automatic)
+
+You do **not** install pack dependencies by hand. On every plugin discovery —
+which happens at **backend startup** and on every **reload/upload** — the backend
+(`PluginManager`) does the following for each pack that contains a
+`requirements.txt`:
+
+1. Runs `pip install -r requirements.txt --find-links <pack_dir>` into the
+   backend's Python environment, **before** importing the metrics. This pulls the
+   full dependency tree (e.g. `numba`, `opencv-python`/`cv2`, `seaborn`) so the
+   compiled `.pyd` files import cleanly instead of being skipped.
+2. `--find-links <pack_dir>` lets a bundled `.whl` (such as a private
+   `neuralstrength` library) install **offline** straight from the pack folder.
+3. On success it writes a hidden `.deps_installed` marker in the pack folder so
+   the same pack is not reinstalled on every reload. **To force a reinstall**,
+   edit the pack's `requirements.txt` (or delete its `.deps_installed` file).
+
+Progress is printed to the backend log with a `[Plugin Deps]` prefix, e.g.:
+
+```text
+[Plugin Deps] Installing requirements for pack 'neuralstrength': ...
+[Plugin Deps] Requirements installed for pack 'neuralstrength'
+Loaded plugin: Cohesion (fairness) from cohesion.cp311-win_amd64.pyd
+```
+
+### 8.4 Adding a pack — two ways
+
+- **From the UI:** *Plugins → Upload* the `.zip`. The backend extracts it under
+  `backend/plugins/<name>/`, installs its `requirements.txt`, reloads, and the
+  metrics show up in their categories.
+- **From the filesystem:** copy the pack folder into `backend/plugins/`, then use
+  *Plugins → Reload* (or restart the backend). The same auto-install runs.
+
+### 8.5 Compatibility and Windows note
+
+- Compiled metrics/wheels are platform- and Python-version specific. The bundled
+  `neuralstrength` pack targets **Python 3.11 / Windows x64** (`cp311-win_amd64`);
+  other environments require recompiled binaries.
+- Dependency install runs while the backend is live. If a pin in
+  `requirements.txt` forces pip to *replace* a package the running backend has
+  already imported (e.g. `numpy`/`scipy`), it can fail with a Windows locked-file
+  error. Reload right after a **fresh backend start**, or install with the backend
+  stopped. The failing package is shown in the `[Plugin Deps]` log line.
 
 ## 9. API Endpoints (Quick Reference)
 
@@ -258,6 +332,33 @@ Base URL: `http://localhost:5000/api`
 - Check backend logs for plugin/runtime exceptions
 - Reload plugins and retry
 
+### Metrics are skipped on load (`ModuleNotFoundError` / import errors)
+
+The backend log shows lines like
+`[Plugin Discovery] Skipping <metric>.pyd: ModuleNotFoundError: No module named '<x>'`.
+This means the pack's dependencies were not installed.
+
+- Confirm the pack has a `requirements.txt` and that `<x>` is listed in it.
+- Trigger install: *Plugins → Reload* or restart the backend; watch for
+  `[Plugin Deps] Installing requirements ...` followed by `[Plugin Deps]
+  Requirements installed`.
+- If it is being skipped because a previous run already wrote a `.deps_installed`
+  marker, edit the pack's `requirements.txt` (or delete the marker) to force a
+  reinstall.
+- On Windows, if `[Plugin Deps] pip install FAILED ... Access is denied`, a base
+  package is locked by the running backend — install with the backend stopped.
+
+### Long evaluations / "timeout"
+
+- Heavy metrics (e.g. `numba`-compiled) can take several minutes; the **first**
+  run also pays a one-time JIT compilation cost and may emit no logs meanwhile —
+  this is expected.
+- The UI no longer aborts long-but-progressing runs. It keeps polling while the
+  backend reports the evaluation as alive and only stops if the backend becomes
+  **unreachable** for several consecutive attempts. The evaluation also keeps
+  running on the backend even if you navigate away.
+- Use **Cancel** to stop a run you no longer need.
+
 ### Missing or broken visualizations
 
 - Not all metrics produce charts
@@ -272,7 +373,15 @@ Base URL: `http://localhost:5000/api`
 
 ## 12. Building Distributable Packages
 
-Windows:
+**Windows (full pipeline).** `build-windows.bat` does everything: installs npm
+deps, prepares the Python venv, compiles the Flask backend to a single
+`backend/app.exe` with PyInstaller, then runs electron-builder:
+
+```bat
+build-windows.bat
+```
+
+To build only the Electron app (when `backend/app.exe` already exists):
 
 ```bash
 npm run build:win
@@ -284,7 +393,13 @@ Linux:
 npm run build:linux
 ```
 
-Artifacts are generated under `dist/`.
+Artifacts are generated under `dist/`. In a packaged build the backend exe is
+spawned by the Electron app, so end users need neither Python nor Node installed.
+
+> Plugin library packs and their `requirements.txt` (Section 8) are resolved at
+> runtime against the environment that runs the backend. For a packaged build,
+> make sure any premium/compiled packs are compatible with the bundled Python
+> version and included in `backend/plugins/` before building.
 
 ## 13. Maintenance Recommendations
 

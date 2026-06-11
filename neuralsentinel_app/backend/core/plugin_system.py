@@ -3,8 +3,10 @@ import importlib.machinery
 import inspect
 import os
 import re
+import sys
+import subprocess
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set
 from plugins.base import MetricPlugin
 
 class PluginManager:
@@ -19,7 +21,10 @@ class PluginManager:
             'privacy': [],
             'fairness': []
         }
-        
+        # Requirement files already installed during this process run, so we
+        # don't shell out to pip again on every reload.
+        self._installed_requirements: Set[str] = set()
+
         self.discover_plugins()
     
     def _is_compiled_extension(self, file_path: Path) -> bool:
@@ -58,7 +63,12 @@ class PluginManager:
         if not self.plugins_dir.exists():
             print(f"Plugins directory not found: {self.plugins_dir}")
             return
-        
+
+        # Install any dependencies declared by plugin packs before importing
+        # the compiled metrics, so imports like cv2/seaborn succeed instead of
+        # the plugin being skipped.
+        self._install_pack_requirements()
+
         # Helper to ignore some directories
         def is_ignored(path: Path) -> bool:
             return any(part.startswith('.') or part == '__pycache__' or part == 'venv' for part in path.parts)
@@ -77,6 +87,70 @@ class PluginManager:
                     self.load_plugin(file_path)
                 except Exception as e:
                     print(f"[Plugin Discovery] Skipping {file_path.name}: {type(e).__name__}: {e}")
+
+    def _install_pack_requirements(self):
+        """Install dependencies declared by plugin packs before loading them.
+
+        Each plugin pack may ship a ``requirements.txt`` next to its compiled
+        metrics (and optionally a private ``.whl``). Before importing the
+        plugins we install those requirements into the running interpreter so
+        imports such as ``cv2``/``seaborn`` succeed instead of the plugin being
+        skipped.
+
+        The full dependency tree is resolved (no ``--no-deps``) so transitive
+        deps the compiled metrics need at import time -- e.g. ``numba`` /
+        ``llvmlite`` / ``pynndescent`` pulled in by ``umap-learn`` -- are
+        installed too. ``--find-links <pack_dir>`` resolves a bundled private
+        wheel offline. A ``.deps_installed`` marker is written on success so an
+        unchanged pack is not reinstalled on every reload/restart.
+
+        Caveat (Windows): if pip must replace a base package the live backend
+        has already imported (e.g. numpy/scipy) to satisfy a pin, the install
+        can fail with locked-file errors. Reload right after a fresh backend
+        start, or with the backend stopped, to avoid that.
+        """
+        def is_ignored(path: Path) -> bool:
+            return any(part.startswith('.') or part == '__pycache__' or part == 'venv' for part in path.parts)
+
+        for req_file in self.plugins_dir.rglob('requirements.txt'):
+            if is_ignored(req_file):
+                continue
+
+            pack_dir = req_file.parent
+            resolved = str(req_file.resolve())
+
+            # Already handled in this process run.
+            if resolved in self._installed_requirements:
+                continue
+
+            # Skip if a previous successful install is still up to date.
+            marker = pack_dir / '.deps_installed'
+            try:
+                if marker.exists() and marker.stat().st_mtime >= req_file.stat().st_mtime:
+                    self._installed_requirements.add(resolved)
+                    continue
+            except OSError:
+                pass
+
+            cmd = [sys.executable, '-m', 'pip', 'install',
+                   '--find-links', str(pack_dir), '-r', str(req_file)]
+            print(f"[Plugin Deps] Installing requirements for pack '{pack_dir.name}': {' '.join(cmd)}")
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True)
+            except Exception as e:
+                print(f"[Plugin Deps] Failed to launch pip for {pack_dir}: {e}")
+                continue
+
+            if result.returncode == 0:
+                print(f"[Plugin Deps] Requirements installed for pack '{pack_dir.name}'")
+                self._installed_requirements.add(resolved)
+                try:
+                    marker.write_text('ok', encoding='utf-8')
+                except OSError as e:
+                    print(f"[Plugin Deps] Could not write marker {marker}: {e}")
+            else:
+                print(f"[Plugin Deps] pip install FAILED for pack '{pack_dir.name}' "
+                      f"(code {result.returncode}):\n{result.stderr[-2000:]}")
 
     def load_plugin(self, file_path: Path, category: str = None):
         """Load a single plugin from file (.py, .so or .pyd)"""

@@ -564,24 +564,40 @@ async function checkAndResumeEvaluation() {
     }
 }
 
-async function pollEvaluationStatus(evalId, maxAttempts = 600) {
+async function pollEvaluationStatus(evalId, maxConsecutiveErrors = 30) {
     const session = getSession();
     if (session.isPolling) return;
     session.isPolling = true;
     session.currentEvalId = evalId;
 
-    for (let i = 0; i < maxAttempts; i++) {
-        // If the view was destroyed but polling continues, we just keep updating the session
-        // If the view exists, we update the DOM
+    // No fixed wall-clock cap: heavy metrics (e.g. numba-compiled) can run for
+    // a long time. Keep polling while the backend reports the run as alive, and
+    // give up only if the backend is unreachable for several consecutive tries.
+    let consecutiveErrors = 0;
 
+    while (true) {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
+        let status, logData;
         try {
             // Fetch status and logs in parallel
-            const [status, logData] = await Promise.all([
+            [status, logData] = await Promise.all([
                 window.api.getEvaluationStatus(evalId),
                 window.api.getEvaluationLogs(evalId, session.logIndex)
             ]);
+            consecutiveErrors = 0;
+        } catch (e) {
+            // Backend busy/unreachable. Don't kill the run on a single failure;
+            // bail out only after repeated consecutive errors.
+            consecutiveErrors++;
+            console.error(`Polling error (${consecutiveErrors}/${maxConsecutiveErrors}):`, e);
+            if (consecutiveErrors >= maxConsecutiveErrors) {
+                session.isPolling = false;
+                session.currentEvalId = null;
+                throw new Error('Se perdió la conexión con el backend durante la evaluación.');
+            }
+            continue;
+        }
 
             // Update Logs
             if (logData && logData.logs && logData.logs.length > 0) {
@@ -698,12 +714,7 @@ async function pollEvaluationStatus(evalId, maxAttempts = 600) {
                 }
             }
 
-        } catch (e) {
-            console.error('Polling error:', e);
-        }
     }
-
-    throw new Error('Evaluation timeout');
 }
 
 // Global hook for results page to resume
