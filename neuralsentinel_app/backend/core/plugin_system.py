@@ -149,8 +149,32 @@ class PluginManager:
                 except OSError as e:
                     print(f"[Plugin Deps] Could not write marker {marker}: {e}")
             else:
-                print(f"[Plugin Deps] pip install FAILED for pack '{pack_dir.name}' "
-                      f"(code {result.returncode}):\n{result.stderr[-2000:]}")
+                combined = (result.stderr or '') + (result.stdout or '')
+                lock_indicators = ('WinError 32', 'being used by another process',
+                                   'Access is denied', '[Errno 13]')
+                missing_indicators = ('No matching distribution',
+                                      'Could not find a version')
+                is_lock = any(ind in combined for ind in lock_indicators)
+                is_missing = any(ind in combined for ind in missing_indicators)
+
+                if is_lock and not is_missing:
+                    # A locked file means the package already exists and is in
+                    # use by the running backend (you can't lock what isn't
+                    # installed), so the dependency is effectively satisfied.
+                    # Record success so we don't retry -- and fail -- on every
+                    # reload. A backend restart is only needed to *upgrade* such
+                    # an in-use package.
+                    print(f"[Plugin Deps] pip could not replace in-use files for pack "
+                          f"'{pack_dir.name}' (already installed/loaded). Treating deps as "
+                          f"satisfied; restart the backend to upgrade locked packages.")
+                    self._installed_requirements.add(resolved)
+                    try:
+                        marker.write_text('ok-locked', encoding='utf-8')
+                    except OSError as e:
+                        print(f"[Plugin Deps] Could not write marker {marker}: {e}")
+                else:
+                    print(f"[Plugin Deps] pip install FAILED for pack '{pack_dir.name}' "
+                          f"(code {result.returncode}):\n{result.stderr[-2000:]}")
 
     def load_plugin(self, file_path: Path, category: str = None):
         """Load a single plugin from file (.py, .so or .pyd)"""

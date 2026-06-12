@@ -161,11 +161,25 @@ def upload_plugin():
                  # Create target directory
                  os.makedirs(str(target_dir), exist_ok=True)
                  
-                 # Unzip
+                 # Unzip member-by-member. On Windows a compiled extension
+                 # (.pyd/.dll) already imported by the running backend cannot be
+                 # overwritten (the file is locked). When re-uploading a pack
+                 # that is already installed and loaded, keep the existing copy
+                 # and record it instead of aborting the whole upload.
                  print(f"[Plugin Upload] Extracting to: {target_dir}")
+                 skipped_locked = []
                  with zipfile.ZipFile(str(temp_zip_path), 'r') as zip_ref:
-                     zip_ref.extractall(str(target_dir))
-                 
+                     for member in zip_ref.infolist():
+                         try:
+                             zip_ref.extract(member, str(target_dir))
+                         except (PermissionError, OSError):
+                             extracted_path = os.path.join(str(target_dir), member.filename)
+                             if os.path.exists(extracted_path):
+                                 skipped_locked.append(member.filename)
+                                 print(f"[Plugin Upload] Skipped locked (already loaded) file: {member.filename}")
+                             else:
+                                 raise
+
                  # Clean up zip
                  os.remove(str(temp_zip_path))
                  print(f"[Plugin Upload] Cleaned up temp ZIP")
@@ -173,14 +187,16 @@ def upload_plugin():
                  # Install any private dependencies bundled in the pack
                  # (requirements.txt / *.whl) BEFORE discovering the plugins,
                  # so imports like `neuralstrength` resolve during reload.
+                 #
+                 # A failure here is non-fatal: reload_plugins() below runs the
+                 # full dependency install in PluginManager.discover_plugins(),
+                 # and a Windows locked-file error on an already-installed/loaded
+                 # package must not block the upload. We surface the summary and
+                 # let the reload decide which plugins actually load.
                  install_summary = _install_pack_dependencies(target_dir)
                  if install_summary and install_summary['returncode'] != 0:
-                     return jsonify({
-                         'error': 'Pack extracted but dependency installation failed. '
-                                  'The plugins were not loaded.',
-                         'path': str(target_dir),
-                         'install': install_summary,
-                     }), 500
+                     print("[Plugin Upload] Dependency pre-install failed (non-fatal); "
+                           "continuing to reload. See [Plugin Deps] output for details.")
 
                  # Reload plugins to discover new ones
                  plugin_manager = current_app.config['PLUGIN_MANAGER']
@@ -188,10 +204,19 @@ def upload_plugin():
                  plugin_manager.reload_plugins()
                  print(f"[Plugin Upload] Now have {len(plugin_manager.plugins)} plugins loaded")
 
+                 message = f'Library {library_name} uploaded and extracted successfully'
+                 if skipped_locked:
+                     message = (
+                         f'Library {library_name} updated. {len(skipped_locked)} compiled '
+                         f'file(s) were already loaded and kept in use; restart the backend '
+                         f'to apply their updated versions.'
+                     )
+
                  return jsonify({
-                     'message': f'Library {library_name} uploaded and extracted successfully',
+                     'message': message,
                      'path': str(target_dir),
                      'plugins_loaded': len(plugin_manager.plugins),
+                     'skipped_locked': skipped_locked,
                      'install': install_summary,
                  }), 201
                  
